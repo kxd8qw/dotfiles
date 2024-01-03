@@ -1,0 +1,30 @@
+#!/usr/bin/env -S python3
+
+import argparse
+import re
+
+# Instantiate argparse
+parser = argparse.ArgumentParser(description='Finds duplicate adjacent words')
+# Required positional argument
+parser.add_argument('filename', nargs='+', help='A required "file" argument')
+
+args = parser.parse_args()
+
+for file in args.filename:
+  dupCount = 0
+  lastWord = ""
+  lineNum = 0
+
+  with open(file, 'r') as f:
+    for line in f:
+      lineNum = lineNum + 1
+      for word in re.split(r'\W+', line.strip().lower()):
+        if word == "" or re.match(r'\s+', word):   # skip blanks and spaces
+          continue
+        elif re.match(r'\W+', word):               # skip non-word characters
+          lastWord = ""
+          continue
+        elif word == lastWord:                     # on a duplicate
+          print("%s:%s \"%s\"" % (file, lineNum, word))
+          dupCount = dupCount + 1
+        lastWord = word
