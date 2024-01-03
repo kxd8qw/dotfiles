@@ -1,0 +1,6 @@
+ANTIDOTE_HOME=~/.cache/antidote
+MAGIC_ENTER_GIT_COMMAND=' git status -u .'
+MAGIC_ENTER_OTHER_COMMAND=' ls'
+ZDOTDIR=~/.config/zsh
+[[ "$SSH_TTY" ]] && ZSH_TMUX_AUTOSTART=true
+ZSH_TMUX_CONFIG=~/.config/tmux/tmux.conf
