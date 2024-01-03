@@ -1,0 +1,265 @@
+# ZSH="$HOME/.config/ohmyzsh" KEEP_ZSHRC=yes sh -c "$(curl -fsSL \
+#    https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+# git clone --depth=1 https://github.com/TamCore/autoupdate-oh-my-zsh-plugins \
+#    $HOME/.config/ohmyzsh/custom/plugins/autoupdate
+# git clone --depth=1 https://github.com/reegnz/jq-zsh-plugin.git \
+#    $HOME/.config/ohmyzsh/custom/plugins/jq
+# git clone --depth=1 https://github.com/romkatv/powerlevel10k \
+#    $HOME/.config/ohmyzsh/custom/themes/powerlevel10k
+# git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions \
+#    $HOME/.config/ohmyzsh/custom/plugins/zsh-autosuggestions
+# git clone --depth=1 https://github.com/marlonrichert/zsh-edit \
+#    $HOME/.config/ohmyzsh/custom/plugins/zsh-edit
+# git clone --depth=1 https://github.com/marlonrichert/zsh-hist \
+#    $HOME/.config/ohmyzsh/custom/plugins/zsh-hist
+# git clone --depth=1 https://github.com/zsh-users/zsh-history-substring-search\
+#    $HOME/.config/ohmyzsh/custom/plugins/zsh-history-substring-search
+# git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting \
+#    $HOME/.config/ohmyzsh/custom/plugins/zsh-syntax-highlighting
+#
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+file="${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+[[ -r "${file}" ]] && source "${file}"; unset file
+
+[[ "$(umask)" == "002" ]] && umask 022
+
+[[ $TERM == "screen" ]] && export TERM=screen-256color
+
+# Keybindings
+bindkey -e # emacs mode
+# Fix the ctrl & alt mappings to shell-word & subword
+bindkey '^[^H' backward-kill-shell-word '^[^?' backward-kill-subword \
+      '^[[1;5D' backward-shell-word '^[[1;3D' backward-subword \
+      '^[[1;5C' forward-shell-word '^[[1;3C' forward-subword \
+      '^p' history-search-backward '^n' history-search-forward \
+      '^[w' kill-region '^[[3;5~' kill-shell-word '^[[3;3~' kill-subword
+# Open buffer line in editor
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey '^x^e' edit-command-line
+bindkey ' ' magic-space # Expand shortcuts on hitting space
+bindkey '^r' redo # Redo change; Ctrl+_ to undo
+
+# If you come from bash you might have to change your $PATH.
+# export PATH=$HOME/bin:/usr/local/bin:$PATH
+
+# Path to your oh-my-zsh installation.
+ZSH="$HOME/.config/ohmyzsh"
+
+# Set name of the theme to load --- if set to 'random', it will
+# load a random theme each time oh-my-zsh is loaded, in which case,
+# to know which specific one was loaded, run: echo $RANDOM_THEME
+# See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
+ZSH_THEME='powerlevel10k/powerlevel10k'
+
+# Set list of themes to pick from when loading at random
+# Setting this variable when ZSH_THEME=random will cause zsh to load
+# a theme from this variable instead of looking in $ZSH/themes/
+# If set to an empty array, this variable will have no effect.
+# ZSH_THEME_RANDOM_CANDIDATES=( 'robbyrussell' 'agnoster' )
+
+# Uncomment the following line to use case-sensitive completion.
+# CASE_SENSITIVE='true'
+
+# Uncomment the following line to use hyphen-insensitive completion.
+# Case-sensitive completion must be off. _ and - will be interchangeable.
+HYPHEN_INSENSITIVE='true'
+
+# Uncomment one of the following lines to change the auto-update behavior
+# zstyle ':omz:update' mode disabled  # disable automatic updates
+# zstyle ':omz:update' mode auto      # update automatically without asking
+zstyle ':omz:update' mode reminder  # just remind me to update when it's time
+
+# Uncomment the following line to change how often to auto-update (in days).
+zstyle ':omz:update' frequency 7
+
+# Uncomment the following line if pasting URLs and other text is messed up.
+# DISABLE_MAGIC_FUNCTIONS='true'
+
+# Uncomment the following line to disable colors in ls.
+# DISABLE_LS_COLORS='true'
+
+# Uncomment the following line to disable auto-setting terminal title.
+# DISABLE_AUTO_TITLE='true'
+
+# Uncomment the following line to enable command auto-correction.
+ENABLE_CORRECTION='true'
+
+# Uncomment the following line to display red dots whilst awaiting completion.
+# You can also set it to another string to have that shown instead of the
+# default red dots. e.g. COMPLETION_WAITING_DOTS='%F{yellow}waiting...%f'
+# Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1
+# (see #5765)
+COMPLETION_WAITING_DOTS='true'
+
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+# DISABLE_UNTRACKED_FILES_DIRTY='true'
+
+# Uncomment the following line if you want to change the command execution time
+# stamp shown in the history command output.
+# You can set one of the optional three formats:
+# 'mm/dd/yyyy'|'dd.mm.yyyy'|'yyyy-mm-dd'
+# or set a custom format using the strftime function format specifications,
+# see 'man strftime' for details.
+HIST_STAMPS='%F.%T'
+
+# Would you like to use another custom folder than $ZSH/custom?
+# ZSH_CUSTOM=/path/to/new-custom-folder
+
+autoload -Uz zmv # Load zmv function
+
+# Completion styling
+zstyle ':completion:*' completer _complete _ignored _match _correct \
+      _approximate _prefix
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' insert-unambiguous true
+zstyle ':completion:*' interactive
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' list-prompt \
+      %SAt %p: Hit TAB for more, or the character to insert%s
+zstyle ':completion:*' matcher-list \
+      'm:{[:lower:][:upper:]}={[:upper:][:lower:]} r:|[._-]=** r:|=**' \
+      'm:{[:lower:][:upper:]}={[:upper:][:lower:]} r:|[._-]=** r:|=** l:|=*' \
+      'm:{[:lower:][:upper:]}={[:upper:][:lower:]} r:|[._-]=** r:|=** l:|=*' \
+      'm:{[:lower:][:upper:]}={[:upper:][:lower:]} r:|[._-]=** r:|=** l:|=*'
+zstyle ':completion:*' menu select=10
+zstyle ':completion:*' original true
+zstyle ':completion:*' rehash true
+zstyle ':completion:*' select-prompt %SScrolling active: current selection %p%s
+zstyle ':completion:*:*:*:*:corrections' format \
+      '%F{yellow}!- %d (errors: %e) -!%f'
+zstyle ':completion:*:*:*:*:descriptions' format '%F{green}-- %d --%f'
+zstyle ':completion:*:*:-command-:*:*' group-order \
+      alias builtins functions commands
+zstyle ':completion:*:messages' format ' %F{purple} -- %d --%f'
+zstyle ':completion:*:warnings' format ' %F{red}-- no matches found --%f'
+
+# Plugin styling
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+zstyle ':hist:*' auto-format no
+zstyle ':omz:plugins:eza' 'dirs-first' yes
+zstyle ':omz:plugins:eza' 'git-status' yes
+zstyle ':omz:plugins:eza' 'hyperlink' yes
+zstyle ':omz:plugins:eza' 'icons' yes
+zstyle ':omz:plugins:eza' 'time-style' iso
+zstyle ':omz:plugins:ssh-agent' agent-forwarding yes
+zstyle ':omz:plugins:ssh-agent' lazy yes
+zstyle ':omz:plugins:ssh-agent' quiet yes
+
+# Which plugins would you like to load?
+# Standard plugins can be found in $ZSH/plugins/
+# Custom plugins may be added to $ZSH_CUSTOM/plugins/
+# Example format: plugins=(rails git textmate ruby lighthouse)
+# Add wisely, as too many plugins slow down shell startup.
+[[ -z "$SSH_AUTH_SOCK" ]] && ssha=ssh-agent || ssha=''
+[[ "$SSH_TTY" ]] && ZSH_TMUX_AUTOSTART=true
+ZSH_TMUX_CONFIG="$HOME/.config/tmux/tmux.conf"
+plugins=(aliases autoupdate brew colored-man-pages copybuffer copyfile \
+      copypath dirhistory eza firewalld fzf history history-substring-search \
+      jq man pip podman safe-paste ssh $ssha sudo systemadmin tldr tmux \
+      web-search zsh-autosuggestions zsh-edit zsh-hist zsh-interactive-cd \
+      zsh-syntax-highlighting)
+unset ssha
+
+source "$ZSH/oh-my-zsh.sh"
+
+# User configuration
+
+#manpath=("/usr/local/man" $manpath); export MANPATH
+path=("$HOME/.local/bin" $path); export PATH
+path+=('/var/lib/flatpak/exports/bin'); export PATH
+
+# You may need to manually set your language environment
+# export LANG=en_US.UTF-8
+
+setopt auto_cd auto_pushd pushd_ignore_dups pushd_to_home   # cd settings
+# completions
+setopt always_to_end complete_aliases complete_in_word long_list_jobs
+setopt correct dvorak hash_list_all                         # corrections
+setopt extended_glob no_case_glob null_glob                 # globs
+setopt nobeep notify rmstarsilent                           # notifications
+setopt appendhistory hist_find_no_dups hist_ignore_all_dups hist_ignore_dups
+setopt hist_ignore_space hist_reduce_blanks hist_save_no_dups no_share_history
+
+# Preferred editor for local and remote sessions
+# if [[ -n $SSH_CONNECTION ]]; then export EDITOR='vim'
+# else export EDITOR='mvim'
+# fi
+if (( $+commands[nvim] )); then export EDITOR='nvim'
+elif (( $+commands[vim] )); then export EDITOR='vim'
+else export EDITOR='vi'; fi
+
+# Set personal aliases, overriding those provided by oh-my-zsh libs,
+# plugins, and themes. Aliases can be placed here, though oh-my-zsh
+# users are encouraged to define aliases within the ZSH_CUSTOM folder.
+# For a full list of active aliases, run `alias`.
+alias -g DN='>/dev/null' NE='2>/dev/null' NUL='>/dev/null 2>&1'
+alias -g chgrp='\chgrp --preserve-root -Rch' chmod='\chmod --preserve-root -Rc'\
+      chown='\chown --preserve-root -Rch'
+alias -g cp="\\cp $(cp --help 2>&-|grep -qs reflink && echo --reflink=auto) -ai"
+alias -g ln='\ln -irs' mv='\mv -i' rm='\rm --preserve-root -Id'
+(( $+commands[distrobox] )) && alias dbt='distrobox enter -n toolbox -- sudo'
+alias -g dd='\dd bs=1M conv=notrunc oflag=dsync status=progress'
+alias df='\df \-h' du='\du -shx' free='\free -h'
+alias dmesg='sudo dmesg -HTL=always --time-format iso'
+alias ed3='eyeD3 --to-v2.3 --remove-{all-{comments,lyrics,objects,unknown},v1}'
+alias gdiff='\git diff --no-index'
+alias gpu='sudo cat /sys/kernel/debug/dri/1/amdgpu_gpu_recover'
+alias k9='kill -9'
+(( $+commands[eza] )) && {
+  opts='--git --group-directories-first --icons=auto --time-style iso -F'
+  alias -g ls="eza $opts" ll='ls -AHgl' \
+        lls='ll -ssize --total-size' llt='ll -smodified'; unset opts; } ||
+{ alias -g ls='\ls -Fhv --color' ll='ls -AHgl'; }
+alias -g l.='ls -d .*' la='ls -A'
+(( $+commands[bat] )) && export LESSOPEN='| bat -f --paging=never %s' &&
+  alias -g -- -h='-h 2>&1 | bat --language=help --style=plain' \
+        --help='--help 2>&1 | bat --language=help --style=plain' \
+        less='\less -R' lessn='LESSOPEN+=" --style=grid,header,snip" \less -R'
+(( $+commands[xdg-open] )) && alias open='xdg-open &>/dev/null'
+alias ping='\ping -n'
+alias pipU='uv pip list --outdated | awk "\$2 ~ /[0-9]/ {print \$1}" |
+      xargs -r uv pip install --upgrade'
+alias rg='\rg -L'
+alias -g rsync='\rsync -AHPUXahhhy --delete-after --info=progress2'
+alias -g smv='rsync --remove-source-files'
+alias ssh='\ssh -qt'
+alias tmux='\tmux new -As0'
+alias tmuxrmr='fd -tf . ${HOME}/.local/share/tmux/resurrect | xargs -r rm -rf'
+(( $+commands[tree] )) && alias tree='\tree --dirsfirst'
+[[ "$(ps afuxwww 2>&- | wc -l)" -gt 7 ]] && ps='ps afuxwww' ||
+  { [[ "$(ps auxwww 2>&- | wc -l)" -gt 7 ]] && ps='ps auxwww' || ps='ps -elf'; }
+alias -g vp="$ps | rg -v 'rg' | rg"; unset ps
+alias webshare='\python -m SimpleHTTPServer'
+unalias nvim vi vim 2>/dev/null
+for i in nvim vi vim; do [[ $i != $EDITOR ]] && eval alias -g $i="$EDITOR"; done
+[[ $EDITOR =~ vim ]] && alias -g vimdiff="$EDITOR -d" nvimdiff="$EDITOR -d"
+alias weather='curl -LSs "https://v2n.wttr.in/charlottesville?Fu"'
+alias -g which='\which -a'
+alias zcp='zmv -C' zln='zmv -L' # Copy & Link with patterns
+dict() { for i; do curl -LSs "dict://dict.org/d:$i"; done; }
+hog() { i=${1%/};sudo du -akx ${i:-/}|grep -Ev $i/.+/\|${i:-/}\$|sort -n|tail; }
+src() { . <(sed -n "${2:+$2;}/${1:-trim}()/,/^}/p" ~/.local/bin/functions); }
+wws() { for i; do curl -sI "http://$i"; done | rg '^Server:' | cut -d: -f2-; }
+# Suffix Aliases
+alias -s conf="$EDITOR" lua="$EDITOR" md="bat" png="open" yaml="bat -l yaml"
+
+# Define ~proj alias
+if [[ -d ~/projects ]]; then hash -d proj=~/projects
+elif [[ -d ~/workspace/uva ]]; then hash -d proj=~/workspace/uva; fi
+
+# If the fortune cookie program exists run it:
+(( $+commands[fortune] )) && echo && fortune && echo
+
+# Shell integrations
+(( $+commands[direnv] )) && eval "$(direnv hook zsh)"
+(( $+commands[fzf] )) && eval "$(fzf --zsh 2>/dev/null)"
+(( $+commands[zoxide] )) && eval "$(zoxide init zsh --cmd cd)"
+
+# To customize prompt, run `p10k configure` or edit ~/.config/ohmyzsh/p10k.zsh.
+[[ -r ~/.config/ohmyzsh/p10k.zsh ]] && source ~/.config/ohmyzsh/p10k.zsh

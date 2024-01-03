@@ -1,0 +1,167 @@
+[[ "$(umask)" == "002" ]] && umask 022
+
+# Download antidote, if it's not there yet
+[[ -d "${ZDOTDIR:=~/.local/share}/antidote" ]] || git clone --depth=1 \
+      https://github.com/mattmc3/antidote "$ZDOTDIR/antidote"
+
+autoload -Uz zmv # Load zmv function
+
+# Completion styling
+zstyle ':completion:*' completer _complete _ignored _match _correct \
+      _approximate _prefix
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*' insert-unambiguous true
+zstyle ':completion:*' interactive
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' list-prompt \
+      %SAt %p: Hit TAB for more, or the character to insert%s
+zstyle ':completion:*' matcher-list \
+      'm:{[:lower:][:upper:]}={[:upper:][:lower:]} r:|[._-]=** r:|=**' \
+      'm:{[:lower:][:upper:]}={[:upper:][:lower:]} r:|[._-]=** r:|=** l:|=*' \
+      'm:{[:lower:][:upper:]}={[:upper:][:lower:]} r:|[._-]=** r:|=** l:|=*' \
+      'm:{[:lower:][:upper:]}={[:upper:][:lower:]} r:|[._-]=** r:|=** l:|=*'
+zstyle ':completion:*' menu select=10
+zstyle ':completion:*' original true
+zstyle ':completion:*' rehash true
+zstyle ':completion:*' select-prompt %SScrolling active: current selection %p%s
+zstyle ':completion:*:*:*:*:corrections' format \
+      '%F{yellow}!- %d (errors: %e) -!%f'
+zstyle ':completion:*:*:*:*:descriptions' format '%F{green}-- %d --%f'
+zstyle ':completion:*:*:-command-:*:*' group-order \
+      alias builtins functions commands
+zstyle ':completion:*:messages' format ' %F{purple} -- %d --%f'
+zstyle ':completion:*:warnings' format ' %F{red}-- no matches found --%f'
+
+# Plugin styling
+zstyle ':antidote:bundle' use-friendly-names 'yes'
+zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
+zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
+zstyle ':hist:*' auto-format no
+zstyle ':omz:plugins:eza' 'dirs-first' yes
+zstyle ':omz:plugins:eza' 'git-status' yes
+zstyle ':omz:plugins:eza' 'hyperlink' yes
+zstyle ':omz:plugins:eza' 'icons' yes
+zstyle ':omz:plugins:eza' 'time-style' iso
+zstyle ':omz:plugins:ssh-agent' agent-forwarding yes
+zstyle ':omz:plugins:ssh-agent' lazy yes
+zstyle ':omz:plugins:ssh-agent' quiet yes
+zstyle ':omz:update' mode disabled
+
+# Source/Load antidote
+source "$ZDOTDIR/antidote/antidote.zsh"
+antidote load
+
+# Add in snippets, if not started
+[[ -z "$SSH_AUTH_SOCK" && -e $XDG_RUNTIME_DIR/ssh-agent.socket ]] &&
+  export SSH_AUTH_SOCK=$XDG_RUNTIME_DIR/ssh-agent.socket
+[[ -z "$SSH_AUTH_SOCK" ]] &&
+  antidote bundle ohmyzsh/ohmyzsh path:plugins/ssh-agent
+
+# Keybindings
+bindkey -e # emacs mode
+# Fix the ctrl & alt mappings to shell-word & subword
+bindkey '^[^H' backward-kill-shell-word '^[^?' backward-kill-subword \
+      '^[[1;5D' backward-shell-word '^[[1;3D' backward-subword \
+      '^[[1;5C' forward-shell-word '^[[1;3C' forward-subword \
+      '^p' history-search-backward '^n' history-search-forward \
+      '^[w' kill-region '^[[3;5~' kill-shell-word '^[[3;3~' kill-subword
+# Open buffer line in editor
+autoload -Uz edit-command-line
+zle -N edit-command-line
+bindkey '^x^e' edit-command-line
+bindkey ' ' magic-space # Expand shortcuts on hitting space
+bindkey '^r' redo # Redo change; Ctrl+_ to undo
+
+# History
+setopt appendhistory hist_find_no_dups hist_ignore_all_dups hist_ignore_dups
+setopt hist_ignore_space hist_reduce_blanks hist_save_no_dups no_share_history
+
+# Settings
+setopt auto_cd auto_pushd pushd_ignore_dups pushd_to_home   # cd settings
+# completions
+setopt always_to_end complete_aliases complete_in_word long_list_jobs
+setopt correct dvorak hash_list_all                         # corrections
+setopt extended_glob no_case_glob null_glob                 # globs
+setopt nobeep notify rmstarsilent                           # notifications
+
+# Environment
+# You may need to manually set your language environment
+#export LANG=en_US.UTF-8
+[[ $TERM == "screen" ]] && export TERM=screen-256color
+ZSH=$(antidote path ohmyzsh/ohmyzsh)
+#manpath=("/usr/local/man" $manpath); export MANPATH
+path=("$HOME/.local/bin" $path); export PATH
+path+=('/var/lib/flatpak/exports/bin'); export PATH
+
+# Preferred editor
+if (( $+commands[nvim] )); then export EDITOR='nvim'
+elif (( $+commands[vim] )); then export EDITOR='vim'
+else export EDITOR='vi'; fi
+
+# Aliases
+alias -g DN='>/dev/null' NE='2>/dev/null' NUL='>/dev/null 2>&1'
+alias -g chgrp='\chgrp --preserve-root -Rch' chmod='\chmod --preserve-root -Rc'\
+      chown='\chown --preserve-root -Rch'
+alias -g cp="\\cp $(cp --help 2>&-|grep -qs reflink && echo --reflink=auto) -ai"
+alias -g ln='\ln -irs' mv='\mv -i' rm='\rm --preserve-root -Id'
+(( $+commands[distrobox] )) && alias dbt='distrobox enter -n toolbox -- sudo'
+alias -g dd='\dd bs=1M conv=notrunc oflag=dsync status=progress'
+alias df='\df \-h' du='\du -shx' free='\free -h'
+alias dmesg='sudo dmesg -HTL=always --time-format iso'
+alias ed3='eyeD3 --to-v2.3 --remove-{all-{comments,lyrics,objects,unknown},v1}'
+alias gdiff='\git diff --no-index'
+alias gpu='sudo cat /sys/kernel/debug/dri/1/amdgpu_gpu_recover'
+alias k9='kill -9'
+(( $+commands[eza] )) && {
+  opts='--git --group-directories-first --icons=auto --time-style iso -F'
+  alias -g ls="eza $opts" ll='ls -AHgl' \
+        lls='ll -ssize --total-size' llt='ll -smodified'; unset opts; } ||
+{ alias -g ls='\ls -Fhv --color' ll='ls -AHgl'; }
+alias -g l.='ls -d .*' la='ls -A'
+(( $+commands[bat] )) && export LESSOPEN='| bat -f --paging=never %s' &&
+  alias -g -- -h='-h 2>&1 | bat --language=help --style=plain' \
+        --help='--help 2>&1 | bat --language=help --style=plain' \
+        less='\less -R' lessn='LESSOPEN+=" --style=grid,header,snip" \less -R'
+(( $+commands[xdg-open] )) && alias open='xdg-open &>/dev/null'
+alias ping='\ping -n'
+alias pipU='uv pip list --outdated | awk "\$2 ~ /[0-9]/ {print \$1}" |
+      xargs -r uv pip install --upgrade'
+alias rg='\rg -L'
+alias -g rsync='\rsync -AHPUXahhhy --delete-after --info=progress2'
+alias -g smv='rsync --remove-source-files'
+alias ssh='\ssh -qt'
+alias tmux='\tmux new -As0'
+alias tmuxrmr='fd -tf . ${HOME}/.local/share/tmux/resurrect | xargs -r rm -rf'
+(( $+commands[tree] )) && alias tree='\tree --dirsfirst'
+[[ "$(ps afuxwww 2>&- | wc -l)" -gt 7 ]] && ps='ps afuxwww' ||
+  { [[ "$(ps auxwww 2>&- | wc -l)" -gt 7 ]] && ps='ps auxwww' || ps='ps -elf'; }
+alias -g vp="$ps | rg -v 'rg' | rg"; unset ps
+alias webshare='\python -m SimpleHTTPServer'
+unalias nvim vi vim 2>/dev/null
+for i in nvim vi vim; do [[ $i != $EDITOR ]] && eval alias -g $i="$EDITOR"; done
+[[ $EDITOR =~ vim ]] && alias -g vimdiff="$EDITOR -d" nvimdiff="$EDITOR -d"
+alias weather='curl -LSs "https://v2n.wttr.in/charlottesville?Fu"'
+alias -g which='\which -a'
+alias zcp='zmv -C' zln='zmv -L' # Copy & Link with patterns
+dict() { for i; do curl -LSs "dict://dict.org/d:$i"; done; }
+hog() { i=${1%/};sudo du -akx ${i:-/}|grep -Ev $i/.+/\|${i:-/}\$|sort -n|tail; }
+src() { . <(sed -n "${2:+$2;}/${1:-trim}()/,/^}/p" ~/.local/bin/functions); }
+wws() { for i; do curl -sI "http://$i"; done | rg '^Server:' | cut -d: -f2-; }
+# Suffix Aliases
+alias -s conf="$EDITOR" lua="$EDITOR" md="bat" png="open" yaml="bat -l yaml"
+
+# Define ~proj alias
+if [[ -d ~/projects ]]; then hash -d proj=~/projects
+elif [[ -d ~/workspace/uva ]]; then hash -d proj=~/workspace/uva; fi
+
+# If the fortune cookie program exists run it:
+(( $+commands[fortune] )) && echo && fortune && echo
+
+# Shell integrations
+(( $+commands[direnv] )) && eval "$(direnv hook zsh)"
+(( $+commands[fzf] )) && eval "$(fzf --zsh 2>/dev/null)"
+(( $+commands[zoxide] )) && eval "$(zoxide init zsh --cmd cd)"
+
+# Prompt theme
+(( $+commands[oh-my-posh] )) && eval "$(oh-my-posh init zsh --config \
+      "$ZDOTDIR/default.yml")"
