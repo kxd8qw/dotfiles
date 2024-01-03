@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+. $(dirname $(which $(basename $0)))/functions
+export -f gettag getimg mp3_gain munge retag
+umask 0022
+
+help() {
+  echo "Usage: $0 [option(s)] <file(s)>
+  -c <comment>	A comment to be added to the file(s)
+  -C			Set file(s) as part of a compilation
+  -h			Help: this text
+  -I			Ignore size of conversion
+  -i <image>		An image to be added to the file(s)
+  -m			Do a high quality music conversion
+  -t			Only cleanup the tags and fix volume
+  -T			Only cleanup the tags, don't fix volume" >&2
+  exit ${1:-1}
+}
+
+checkfor eyeD3 ffmpeg id3v2 lame mp3gain
+
+while getopts ":Cc:hIi:mTt" opt; do
+  case "$opt" in
+    c) export co="$OPTARG" ;;
+    C) shift
+      eyeD3 --set-text-frame="TPE2:Various Artists" \
+            --set-text-frame=TCMP:1 "$@" 2>/dev/null ||
+      eyeD3 --text-frame=TCMP:1 --text-frame="TPE2:Various Artists" "$@" \
+            2>/dev/null
+      exit ;;
+    h) help ;;
+    i) export im="$OPTARG" ;;
+    I) export ignore_size=y ;;
+    m) export music_file=y ;;
+    t) export tag_only=y ;;
+    T) export tag_only=y skip_vol=y ;;
+    "?") echo "Unknown option $OPTARG"; help 1 ;;
+    ":") echo "No argument value for option $OPTARG"; help 2 ;;
+  esac
+done
+shift $(( OPTIND - 1 ))
+[[ $# -ge 1 ]] || help 3
+
+parallel -r '(.*)' --shell retag "{1}" "$im" "" "" "" "" "" "" "$co" ::: "$@"

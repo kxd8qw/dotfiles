@@ -1,0 +1,27 @@
+# disable the ctrl+s idiocy
+stty -ixon
+
+# use non-duplicate arrays for paths
+typeset -TU INFOPATH infopath
+typeset -TU LD_LIBRARY_PATH ld_library_path
+typeset -U fpath manpath path
+
+# setup the go path if it's installed
+# go install github.com/cdillond/parcel@latest
+d="$HOME/.local/share/go/bin" && [[ -d $d ]] && path=("$d" $path); export PATH
+
+# setup the brew environment variables if it's installed
+if [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+  brewp="/home/linuxbrew/.linuxbrew"
+elif [[ -x /opt/homebrew/bin/brew ]]; then
+  brewp="/opt/homebrew"
+fi
+
+if [[ -x ${brewp}/bin/brew ]] && [[ $- == *i* ]]; then
+  for d in ${brewp}/opt/{*/libexec/gnu,python*/libexec/}bin ${brewp}/{s,}bin; do
+    path=("$d" $path); export PATH
+  done 2>/dev/null
+  eval "$(${brewp}/bin/brew shellenv)"
+  fpath=("${brewp}/share/zsh/site-functions" $fpath); export PATH
+  unset brewp || :
+fi

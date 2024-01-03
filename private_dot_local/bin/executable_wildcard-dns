@@ -1,0 +1,6 @@
+#!/usr/bin/env -S bash
+curl -LSfs https://www.internic.net/domain/root.zone |
+      awk '$1~/[0-9A-Za-z]+\./ && $4~/NS/ {print $1}' |
+      sort -u | xargs -I'{}' -P"$(nproc)" dig _.{} |
+      sed -En 's|^_\.([-_0-9A-Za-z]+)\..*\t([-_.0-9A-Za-z]+)$|\1 \2|p' |
+      grep -v ' 127\.'

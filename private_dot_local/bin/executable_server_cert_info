@@ -1,0 +1,12 @@
+#usr/bin/env -S bash
+
+if [[ "$#" -lt 1 ]] || [[ "$#" -gt 2 ]]; then
+  echo "ERROR: Invalid arguments!"
+  echo "\n    $(basename "$0") <hostname> [port]"
+  echo "\t<hostname> - is required hostname to check the certificate on"
+  echo "\t[port] - is optional port number to check the certificate on"
+  exit 1
+fi
+
+openssl s_client -servername "$1" -connect "$1:${2:-443}" </dev/null 2>&- |
+      openssl x509 -text

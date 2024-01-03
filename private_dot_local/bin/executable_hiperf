@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+#===============================================================================
+#          FILE: hiperf.sh
+#
+#         USAGE: ./hiperf.sh
+#
+#   DESCRIPTION: Wrapper to run commands which the CPU governer set to perf
+#
+#       OPTIONS: ---
+#  REQUIREMENTS: ---
+#          BUGS: ---
+#         NOTES: ---
+#        AUTHOR: David Personette (dperson@gmail.com),
+#  ORGANIZATION:
+#       CREATED: 2014-10-21 07:18
+#      REVISION: 1.0
+#===============================================================================
+
+set -o nounset                              # Treat unset variables as an error
+
+### gov: set the CPU scaling governor
+# Arguments:
+#   gov) the governor to use
+# Return: the set governor
+gov() { local gov="$1"
+  for i in /sys/devices/system/cpu/*/cpufreq/scaling_governor; do
+    sudo sh -c "echo \"$gov\" >$i"
+  done
+}
+
+[[ "$(uname)" =~ Linux ]] && gov performance
+"$@"
+[[ "$(uname)" =~ Linux ]] && gov ondemand
