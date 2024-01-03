@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+. $(dirname $(which $(basename $0)))/functions
+
+checkfor advpng optipng jpegoptim jpegtran
+
+smaller() { local i="$1" tmp="$2"
+  chmod --reference="$i" "$tmp" 2>&-
+  if [[ $(du -k "$tmp"|awk '{print $1}') -lt $(du -k "$i"|awk '{print $1}') ]]
+  then cp -p "$tmp" "$i"; else cp -p "$i" "$tmp"; fi
+}
+
+optimg() { local in="$1" tmp=""
+  [[ -e "$in" ]] || { echo "optimage: No such file: $i" >&2; return; }
+
+  tmp=$(mktemp -d /tmp/img-XXXXXXXXXX); cp -p "$in" $tmp; tmp="$tmp/${in##*/}"
+  trap "rm -r \"${tmp%/*}\"" {1..15}
+
+  case "$in" in
+    *.BMP|*.GIF|*.PNG|*.bmp|*.gif|*.png)
+      optipng -o7 -preserve -q "$tmp"
+      if [[ "$in" =~ \.[Pp][Nn][Gg]$ ]]; then smaller "$in" "$tmp"
+      else chmod --reference="$in" "${tmp/.*/.png}" 2>&-; rm "$in" "$tmp"
+        in="${in/.*/.png}"; tmp="${tmp/.*/.png}"; cp -p "$tmp" "$in"; fi
+      advpng -4 -q -z "$tmp"; smaller "$in" "$tmp"
+      ;;
+    *.JPG|*.JPEG|*.jpg|*.jpeg)
+      jpegoptim -pqm90 "$tmp"; smaller "$in" "$tmp"
+      jpegtran -optimize -copy comments "$in" >"$tmp";smaller "$in" "$tmp"
+      ;;
+    *) echo "unknown file type: $in" ;;
+  esac
+
+  rm -r ${tmp%/*}
+}
+
+export -f optimg smaller
+parallel -r '(.*)' --shell optimg "{1}" </dev/null ::: "$@"

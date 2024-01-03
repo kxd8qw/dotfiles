@@ -1,0 +1,23 @@
+#!/usr/bin/env -S python3
+
+import argparse
+
+# Instantiate argparse
+parser = argparse.ArgumentParser(description='Trim trailing white space')
+# Required positional argument
+parser.add_argument('filename', nargs='+', help='A required "file" argument')
+args = parser.parse_args()
+
+
+# chomp function to strip trailing white space from lines
+def chomp(file):
+  lines = []
+  with open(file, 'r') as f:
+    lines = [line.rstrip() for line in f]
+  with open(file, 'w') as f:
+    f.write('\n'.join(lines))
+
+
+# Trim all file(s) passed in as arguments
+for file in args.filename:
+  chomp(file)

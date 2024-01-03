@@ -1,0 +1,7 @@
+/* Tab configuration */
+.tabbrowser-tab:not([pinned]) { min-width: 30px !important; }
+.tabbrowser-tab:not([fadein]) { min-width: 30px !important; }
+.tabs-newtab-button { display: none; }
+
+/* Never show "Open in New Window" when right clicking */
+#context-openlink { display: none !important; }
