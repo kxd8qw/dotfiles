@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# Print the root of the tree
+(cd ${1:-.} && pwd)
+
+# sed 1: remove colons
+# sed 2: replace higher directories with dashes
+# sed 3: indent
+# sed 4: replace first dash with a pipe
+ls -R $1 | grep ':$' |
+      sed 's/:$//; s#[^-][^/]*/#--#g; s/^/ /; s/-/|/'
+
+# Check for no folders
+if [[ $(ls -F -1 $1 | grep "/" | wc -l) == 0 ]]; then
+  echo " -> no sub-directories"
+fi

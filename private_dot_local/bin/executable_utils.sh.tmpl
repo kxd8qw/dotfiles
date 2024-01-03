@@ -1,0 +1,175 @@
+#!/usr/bin/env -S bash
+set -euxo pipefail
+
+[[ -d "${HOME}/.local/bin" ]] || mkdir -p "${HOME}/.local/bin"
+
+get_git_pkg() { local prj="$1" out="$3" url \
+      filter=".[0].assets[]|select(.name|test(\"$2\")).browser_download_url"
+  PATH=/bin:/usr/bin:/usr/local/bin type -p "${4:-${prj##*/}}" >/dev/null &&
+        return 1 || :
+  url=$(curl -LSs "https://api.github.com/repos/$prj/releases" |
+        jq -r "$filter")
+  curl -LSs "$url" -o "$out"
+}
+
+update_file() { local file="$1" temp="/tmp/${1##*/}"
+  trim "$temp" >/dev/null 2>&1 || :
+  if diff -q "$temp" "$file" >/dev/null 2>&1; then
+    rm "$temp"
+  else
+    mv -v "$temp" "$file"
+  fi
+}
+
+{{- if eq .chezmoi.osRelease.id "furios" }}
+for i in bat btop distrobox git git-delta eza fd-find fzf jq just less \
+      libfuse2t64 man-db manpages phosh-osk-stub ripgrep rsync ssh yq zoxide \
+      zsh; do
+  dpkg -l $i >/dev/null 2>&1 || sudo apt install $i
+done
+
+sudo ln -sf fdfind /usr/bin/fd
+sudo ln -sf batcat /usr/bin/bat
+
+get_git_pkg "twpayne/chezmoi" "linux_arm.tar" "/tmp/chezmoi.tgz" && {
+  tar -C "${HOME}/.local/bin" -xf "/tmp/chezmoi.tgz" chezmoi
+  rm "/tmp/chezmoi.tgz"
+}
+chezmoi completion zsh --output=/tmp/_chezmoi
+update_file "${HOME}/.config/zsh/antidote/functions/_chezmoi"
+
+get_git_pkg "matsuu/neovim-aarch64-appimage" "appimage" \
+      "${HOME}/.local/bin/nvim.appimage"
+chmod +x "${HOME}/.local/bin/nvim.appimage"
+ln -sf "${HOME}/.local/bin/nvim.appimage" "${HOME}/.local/bin/nvim"
+
+URL="https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh"
+URL="$URL-linux-arm64"
+curl -LSs "$URL" -o "${HOME}/.local/bin/oh-my-posh"
+chmod +x "${HOME}/.local/bin/oh-my-posh"
+
+get_git_pkg "aaronriekenberg/rust-parallel" "aarch64.*inux" "/tmp/parallel.tgz"\
+      "parallel" && {
+  tar -C /tmp -xf /tmp/parallel.tgz
+  cp /tmp/rust-parallel "${HOME}/.local/bin/parallel"
+  rm -rf /tmp/*parallel*
+}
+
+get_git_pkg "ryanoasis/nerd-fonts" "CascadiaCode.zip" "/tmp/caskaydia.zip"
+mkdir -p /tmp/caskaydia
+sudo mkdir -p /usr/share/fonts/NerdFonts
+unzip -q /tmp/caskaydia.zip -d /tmp/caskaydia/
+sudo cp /tmp/caskaydia/CaskaydiaCoveNerdFontPropo-Regular.ttf \
+      /usr/share/fonts/NerdFonts/CaskaydiaCoveNerdFont.ttf
+rm -rf /tmp/caskaydia*
+sudo fc-cache --system-only --really-force
+gsettings set org.gnome.desktop.interface monospace-font-name \
+      "CaskaydiaCove Nerd Font Propo 11"
+{{- else if eq .chezmoi.osRelease.id "rhel" }}
+if [[ ! -x "${HOME}/.local/bin/jq" ]]; then
+  url="https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-amd64"
+  curl -L "$url" -o "${HOME}/.local/bin/jq"
+  unset url
+  chmod +x "${HOME}/.local/bin/jq"
+fi
+
+get_git_pkg "sharkdp/bat" "x86_64.*musl" "/tmp/bat.tgz" && {
+  tar -C /tmp -xf "/tmp/bat.tgz"
+  cp /tmp/bat*/bat "${HOME}/.local/bin/"
+  rm -rf /tmp/bat*
+}
+URL="https://github.com/sharkdp/bat/raw/master/assets/completions"
+curl -LSs "$URL/bat.zsh.in" -o /tmp/_bat
+update_file "${HOME}/.config/ohmyzsh/functions/_bat"
+
+get_git_pkg "twpayne/chezmoi" "ux-musl_amd64" "/tmp/chezmoi.tgz" && {
+  tar -C "${HOME}/.local/bin" -xf "/tmp/chezmoi.tgz" chezmoi
+  rm "/tmp/chezmoi.tgz"
+}
+chezmoi completion zsh --output=/tmp/_chezmoi
+update_file "${HOME}/.config/ohmyzsh/functions/_chezmoi"
+
+get_git_pkg "dandavison/delta" "linux-musl.tar" "/tmp/delta.tgz" && {
+  tar -C /tmp -xf "/tmp/delta.tgz"
+  cp /tmp/delta*/delta "${HOME}/.local/bin/"
+  rm -rf /tmp/delta*
+}
+URL="https://github.com/dandavison/delta/raw/main/etc/completion"
+curl -LSs "$URL/completion.zsh" -o /tmp/_delta
+update_file "${HOME}/.config/ohmyzsh/functions/_delta"
+
+get_git_pkg "eza-community/eza" "linux-musl.tar" "/tmp/eza.tgz" && {
+  tar -C "${HOME}/.local/bin" -xf "/tmp/eza.tgz"
+  rm "/tmp/eza.tgz"
+}
+URL="https://github.com/eza-community/eza/raw/main/completions/zsh/_eza"
+curl -LSs "$URL" -o /tmp/_eza
+update_file "${HOME}/.config/ohmyzsh/functions/_eza"
+
+get_git_pkg "sharkdp/fd" "x86_64.*musl" "/tmp/fd.tgz" && {
+  tar -C /tmp -xf "/tmp/fd.tgz"
+  cp /tmp/fd*/fd "${HOME}/.local/bin/"
+  rm -rf /tmp/fd*
+}
+URL="https://github.com/sharkdp/fd/raw/master/contrib/completion/_fd"
+curl -LSs "$URL" -o /tmp/_fd
+update_file "${HOME}/.config/ohmyzsh/functions/_fd"
+
+get_git_pkg "junegunn/fzf" "linux_amd64" "/tmp/fzf.tgz" && {
+  tar -C "${HOME}/.local/bin" -xf "/tmp/fzf.tgz" fzf
+  rm "/tmp/fzf.tgz"
+}
+fzf --zsh >/tmp/_fzf
+update_file "${HOME}/.config/ohmyzsh/functions/_fzf"
+
+get_git_pkg "jqlang/jq" "linux-amd64" "${HOME}/.local/bin/jq" && {
+  chmod +x "${HOME}/.local/bin/jq"
+}
+
+get_git_pkg "casey/just" "x86_64.*musl.*gz\$" "/tmp/just.tgz" && {
+  tar -C "${HOME}/.local/bin" -xf "/tmp/just.tgz" just
+  rm -rf /tmp/just.tgz
+}
+URL="https://github.com/casey/just/raw/master/completions/just.zsh"
+curl -LSs "$URL" -o /tmp/_just
+update_file "${HOME}/.config/ohmyzsh/functions/_just"
+
+get_git_pkg "neovim/neovim-releases" "linux64.tar" "/tmp/neovim.tgz" "nvim" && {
+  rm -rf "${HOME}/.local/nvim-linux64"
+  tar -C "${HOME}/.local" -xf "/tmp/neovim.tgz"
+  yes | ln -frs "${HOME}/.local/nvim-linux64/bin/nvim" "${HOME}/.local/bin/" ||:
+  rm -rf "/tmp/neovim.tgz"
+}
+URL="https://github.com/NoahTheDuke/vim-just/raw/main/syntax/just.vim"
+curl -LSs "$URL" -o /tmp/just.vim
+update_file "${HOME}/.local/nvim-linux64/share/nvim/runtime/syntax/just.vim"
+
+URL="https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/posh"
+URL="$URL-linux-amd64"
+curl -LSs "$URL" -o "${HOME}/.local/bin/oh-my-posh"
+chmod +x "${HOME}/.local/bin/oh-my-posh"
+
+ver=$(rpm -qa | awk '/glibc-[0-9]/ {sub(/^[^-]*-/, ""); sub (/-.*/, "");print}')
+if [[ "$ver" =~ ^2.29|^2.[3-9]|^[3-9] ]]; then
+  get_git_pkg "aaronriekenberg/rust-parallel" "x86_64.*linux" \
+        "/tmp/parallel.tgz" "parallel" && {
+    tar -C /tmp -xf /tmp/parallel.tgz
+    cp /tmp/rust-parallel "${HOME}/.local/bin/parallel"
+    rm -rf /tmp/*parallel*
+  }
+fi
+
+get_git_pkg "BurntSushi/ripgrep" "_64.*musl.tar.gz\$" "/tmp/ripgrep.tgz" "rg" &&{
+  tar -C /tmp -xf "/tmp/ripgrep.tgz"
+  cp /tmp/ripgrep*/rg "${HOME}/.local/bin/"
+  rm -rf /tmp/ripgrep*
+}
+# zsh completion is in a omz plugin
+
+get_git_pkg "ajeetdsouza/zoxide" "x86_64.*musl" "/tmp/zoxide.tgz" && {
+  tar -C "${HOME}/.local/bin" -xf "/tmp/zoxide.tgz" zoxide
+  rm -rf /tmp/zoxide.tgz
+}
+{{- end }}
+
+#{ set +x; } 2>&-
