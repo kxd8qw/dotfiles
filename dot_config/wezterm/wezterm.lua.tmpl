@@ -1,0 +1,236 @@
+-- Pull in the wezterm API
+local wezterm = require('wezterm')
+
+-- This will hold the configuration.
+local config = wezterm.config_builder()
+
+-- Define a lua table to hold _our_ module's functions
+local appearance = {}
+
+-- Returns a bool based on whether the host operating system's appearance
+function appearance.is_dark()
+  -- wezterm.gui is not always available, depending on what environment wezterm
+  -- is operating in. Just return true if it's not defined.
+  if wezterm.gui then
+    -- Just look for the string 'Dark' and if found it assume appearance is dark
+    return wezterm.gui.get_appearance():find('Dark')
+  end
+  return true
+end
+
+function docker_list()
+  local docker_list = {}
+  local success, stdout, stderr = wezterm.run_child_process {
+    'docker',
+    'container',
+    'ls',
+    '--format',
+    '{{"{{"}}.ID{{"}}"}}:{{"{{"}}.Names{{"}}"}}',
+  }
+  for _, line in ipairs(wezterm.split_by_newlines(stdout)) do
+    local id, name = line:match '(.-):(.+)'
+    if id and name then
+      docker_list[id] = name
+    end
+  end
+  return docker_list
+end
+
+function make_docker_label_func(id)
+  return function(name)
+    local success, stdout, stderr = wezterm.run_child_process {
+      'docker',
+      'inspect',
+      '--format',
+      '{{"{{"}}.State.Running{{"}}"}}',
+      id,
+    }
+    local running = stdout == 'true\n'
+    local color = running and 'Green' or 'Red'
+    return wezterm.format {
+      { Foreground = { AnsiColor = color } },
+      { Text = 'docker container named ' .. name },
+    }
+  end
+end
+
+function make_docker_fixup_func(id)
+  return function(cmd)
+    cmd.args = cmd.args or { '/bin/sh' }
+    local wrapped = {
+      'docker',
+      'exec',
+      '-it',
+      id,
+    }
+    for _, arg in ipairs(cmd.args) do
+      table.insert(wrapped, arg)
+    end
+
+    cmd.args = wrapped
+    return cmd
+  end
+end
+
+function compute_exec_domains()
+  local exec_domains = {}
+  for id, name in pairs(docker_list()) do
+    table.insert(
+      exec_domains,
+      wezterm.exec_domain(
+        'docker:' .. name,
+        make_docker_fixup_func(id),
+        make_docker_label_func(id)
+      )
+    )
+  end
+  return exec_domains
+end
+
+-- This is where you actually apply your config choices
+
+config.set_environment_variables = {
+  {{- if eq .chezmoi.os "darwin" }}
+  PATH = '/opt/homebrew/bin:' .. os.getenv('PATH'),
+  {{- else }}
+  PATH = '/home/linuxbrew/.linuxbrew/bin:' .. os.getenv('PATH'),
+  {{- end }}
+}
+
+config.exec_domains = compute_exec_domains()
+
+-- local ssh_domains = require('extra.ssh')
+-- config.ssh_domains = ssh_domains
+
+-- Use the defaults as a base
+config.hyperlink_rules = wezterm.default_hyperlink_rules()
+
+-- initial terminal size
+config.initial_cols = 100
+config.initial_rows = 33
+
+-- just use the open window
+config.prefer_to_spawn_tabs = true
+
+-- notification bell
+-- config.audible_bell = 'Disabled'
+config.colors = {
+  visual_bell = '#202020',
+}
+config.visual_bell = {
+  fade_in_function = 'EaseIn',
+  fade_in_duration_ms = 150,
+  fade_out_function = 'EaseOut',
+  fade_out_duration_ms = 150,
+}
+
+-- make sure you use a font you have installed
+config.adjust_window_size_when_changing_font_size = true
+config.font = wezterm.font('CaskaydiaCove Nerd Font Propo')
+{{- if eq .chezmoi.os "darwin" }}
+config.font_size = 12
+{{- else }}
+config.font_size = 11
+{{- end }}
+
+-- color scheme
+if appearance.is_dark() then
+  config.color_scheme = 'GitHub Dark'
+else
+  config.color_scheme = 'GitHub Light'
+end
+
+{{- if eq .chezmoi.os "darwin" }}
+-- Removes the title bar, leaving only the tab bar
+config.window_decorations = 'RESIZE|INTEGRATED_BUTTONS'
+{{- end }}
+
+--window opacity reduced
+{{- if eq .chezmoi.os "darwin" }}
+config.window_background_opacity = 0.6
+config.macos_window_background_blur = 30
+{{- else }}
+config.window_background_opacity = 0.85
+{{- end }}
+
+-- scroll bar
+config.enable_scroll_bar = true
+
+-- tab bar customization
+local function segments_for_right_status(window)
+  return {
+    {{- if eq .chezmoi.os "darwin" }}
+    wezterm.strftime('%F %a'),
+    {{- else }}
+    window:active_workspace(),
+    {{- end }}
+    wezterm.hostname(),
+  }
+end
+wezterm.on('update-status', function(window, _)
+  -- Grab the utf8 character for the 'powerline' left facing solid arrow.
+  local SOLID_LEFT_ARROW = utf8.char(0xe0b6)
+  local segments = segments_for_right_status(window)
+
+  -- Grab the current window's configuration, and from it the palette (this is
+  -- the combination of your chosen colour scheme including any overrides).
+  local color_scheme = window:effective_config().resolved_palette
+  local bg = wezterm.color.parse(color_scheme.background)
+  local fg = color_scheme.foreground
+
+  -- Each powerline segment is going to be coloured progressively darker/lighter
+  local gradient_to, gradient_from = bg
+  if appearance.is_dark() then
+    gradient_from = gradient_to:lighten(0.2)
+  else
+    gradient_from = gradient_to:darken(0.2)
+  end
+
+  local gradient = wezterm.color.gradient(
+    {
+      orientation = 'Horizontal',
+      colors = { gradient_from, gradient_to },
+    },
+    #segments -- only gives us as many colours as we have segments.
+  )
+
+  -- We'll build up the elements to send to wezterm.format in this table.
+  local elements = {}
+
+  for i, seg in ipairs(segments) do
+    local is_first = i == 1
+
+    if is_first then
+      table.insert(elements, { Background = { Color = 'none' } })
+    end
+    table.insert(elements, { Foreground = { Color = gradient[i] } })
+    table.insert(elements, { Text = SOLID_LEFT_ARROW })
+
+    table.insert(elements, { Foreground = { Color = fg } })
+    table.insert(elements, { Background = { Color = gradient[i] } })
+    table.insert(elements, { Text = ' ' .. seg .. '  ' })
+  end
+
+  window:set_right_status(wezterm.format(elements))
+end)
+
+-- Custom Key Bindings
+-- disable_default_key_bindings = true,
+config.keys = {
+  -- ... add these new entries to your config.keys table
+  {
+    key = ',',
+    {{- if eq .chezmoi.os "darwin" }}
+    mods = 'SUPER',
+    {{- else }}
+    mods = 'CTRL',
+    {{- end }}
+    action = wezterm.action.SpawnCommandInNewTab({
+      cwd = wezterm.home_dir,
+      args = { 'nvim', wezterm.config_file },
+    }),
+  },
+}
+
+-- and finally, return the configuration to wezterm
+return config
