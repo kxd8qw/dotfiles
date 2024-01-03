@@ -1,0 +1,1 @@
+/usr/bin/env perl -nle 'while($_ =~ m/\b(([\w-]+:\/\/?|www[.])[^\s()<>]+(?:\([\w\d]+\)|([^[:punct:]\s]|\/)))/g) { print "$1"; }'
