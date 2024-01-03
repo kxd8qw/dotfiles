@@ -1,0 +1,93 @@
+" ex/vi options
+set autoindent
+set autowrite
+set directory=/tmp
+set ignorecase
+set magic
+set modelines
+set report=1
+set remap
+set showmatch
+set showmode
+set shiftwidth=4
+set tabstop=4
+set terse
+set wrapscan
+"
+abbr dater :.!date +\%Y-\%m-\%dkJA
+"
+" keys in display mode
+" F1 Help
+map OP :!man vi
+" F2 / F3 Auto indent on / off
+map OQ :set ai
+map OR :set noai
+" F7 / F8 Line numbering on / off
+map [18~ :set number
+map [19~ :set nonumber
+" F9 / F10 Previous / Next file
+map [20~ :N
+map [21~ :n
+map \s ^[:w^M:!aspell -c --dont-backup "%"^M:e! "%"^M^M
+map OA  k
+map [A  k
+map OB  j
+map [B  j
+map OD  h
+map [D  h
+map     h
+map     h
+map OC  l
+map [C  l
+map [2~ i
+map [3~ x
+map [1~ 0
+map OH  0
+map [H  0
+map [4~ $
+map OF  $
+map [F  $
+map [5~ 
+map [6~ 
+map [E  ""
+map [G  ""
+map OE  ""
+map Oo  :
+map Oj  *
+map Om  -
+map Ok  +
+map Ol  +
+map OM  
+map Ow  7
+map Ox  8
+map Oy  9
+map Ot  4
+map Ou  5
+map Ov  6
+map Oq  1
+map Or  2
+map Os  3
+map Op  0
+map On  .
+"
+" keys in insert mode
+" Emacs style start / end of line
+map!  I
+map!  A
+map! Oo  :
+map! Oj  *
+map! Om  -
+map! Ok  +
+map! Ol  +
+map! OM  
+map! Ow  7
+map! Ox  8
+map! Oy  9
+map! Ot  4
+map! Ou  5
+map! Ov  6
+map! Oq  1
+map! Or  2
+map! Os  3
+map! Op  0
+map! On  .
