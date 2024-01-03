@@ -139,6 +139,8 @@ brew "tree-sitter-cli" unless system \
       "PATH=/bin:/usr/bin:/usr/local/bin type -p tree-sitter-cli >/dev/null"
 brew "uv" unless system \
       "PATH=/bin:/usr/bin:/usr/local/bin type -p uv >/dev/null"
+brew "watch" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p watch >/dev/null"
 brew "xorriso" if OS.mac?
 brew "ykman" unless system \
       "PATH=/bin:/usr/bin:/usr/local/bin type -p ykman >/dev/null"
