@@ -1,0 +1,22 @@
+/* Stop those <blink> and <marquee> tags! */
+blink { text-decoration:none; !important; }
+marquee { -moz-binding:none; display:block; height:auto; !important; }
+
+/* Change cursor for links that open in new window */
+:link[target="_blank"], :visited[target="_blank"],
+:link[target="_new"],   :visited[target="_new"] { cursor:crosshair; }
+
+/* Change cursor for JavaScript links */
+a[href^="javascript:"] { cursor:move; }
+
+/* Kill Google-bar with fire */
+/* #gb, #mngb { display:none; visibility:hidden; !important; } */
+
+/* Special Cursor for Redirect Cleaner
+a[redirectcleaner], a[redirectcleaner] *,
+a[redirectcleaner-href], a[redirectcleaner-href] *,
+a[redirectcleaner-onclick], a[redirectcleaner-onclick] *,
+a[redirectcleaner-onkeydown], a[redirectcleaner-onkeydown] *,
+a[redirectcleaner-onmousedown], a[redirectcleaner-onmousedown] *,
+a[redirectcleaner-target], a[redirectcleaner-target] *
+{ cursor: url("chrome://redirectcleaner/skin/cursor.png"), auto !important; } */
