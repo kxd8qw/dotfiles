@@ -4,7 +4,7 @@ set -euxo pipefail
 # Where to store the python venv
 venv="${HOME}/.local/share/virtualenvs/ansible"
 
-[[ -d "${venv}" ]] || uv venv "${venv}"
+[[ -d "${venv}" ]] || uv venv "${venv}" -p python3.13
 
 [[ "${VIRTUAL_ENV:-""}" ]] || source "${venv}/bin/activate"
 
