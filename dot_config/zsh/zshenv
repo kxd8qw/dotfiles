@@ -1,0 +1,23 @@
+ANTIDOTE_HOME=~/.cache/antidote
+MAGIC_ENTER_GIT_COMMAND=' ls; git status -u .'
+MAGIC_ENTER_OTHER_COMMAND=' ls'
+ZDOTDIR=~/.config/zsh
+[[ "$SSH_TTY" ]] && ZSH_TMUX_AUTOSTART=true
+ZSH_TMUX_CONFIG=~/.config/tmux/tmux.conf
+
+# History
+HISTDUP=erase
+HIST_STAMPS='%F.%T'
+HISTORY_IGNORE='(bg *|btop|clear|exit|fg *|hist*|hs*|htop|jobs|k9|l[als] *'
+HISTORY_IGNORE+='|man *|pwd|top *|uptime)'
+HISTFILE=$ZDOTDIR/.zsh_history
+
+ZSH_COMPDUMP=${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump
+#CASE_SENSITIVE='true' # Uncomment to use case-sensitive completion.
+HYPHEN_INSENSITIVE='true' # Uncomment to use hyphen-insensitive completion.
+#ENABLE_CORRECTION='true' # Uncomment to enable command auto-correction.
+COMPLETION_WAITING_DOTS='true' # Uncomment to display red dots while waiting
+# Uncomment the following line if you want to disable marking untracked files
+# under VCS as dirty. This makes repository status check for large repositories
+# much, much faster.
+#DISABLE_UNTRACKED_FILES_DIRTY='true'
