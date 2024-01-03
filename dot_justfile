@@ -1,0 +1,110 @@
+# You can add your own commands here! For documentation,
+# see: https://ublue.it/guide/just/
+import? "/usr/share/ublue-os/justfile"
+import? "/usr/share/ublue-os/just/00-entry.just"
+
+default:
+  @just --choose
+
+init-home:
+  #!/usr/bin/env -S bash
+  [[ ! -r ~/.ssh/id_ed25519 ]] && { echo "Missing SSH keys"; exit 1; }
+  [[ ! -r ~/.config/chezmoi/chezmoi.toml ]] &&
+        { echo "Missing chezmoi.toml"; exit 1; }
+  set -euxo pipefail
+  just brew
+  { set +x; } 2>&-;eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)";set -x
+  [[ -x $(which chezmoi 2>&-) ]] || brew install chezmoi
+  chezmoi init --ssh --verbose dperson
+  cp ~/.local/share/chezmoi/dot_config/Brewfile ~/.config/Brewfile
+  brew tap "homebrew/bundle"
+  brew bundle
+  just nvchad
+  just tmux-tpm
+  chezmoi apply -v
+  nvim --headless "+Lazy! sync" +qa || :
+  ~/.config/tmux/plugins/tpm/scripts/install_plugins.sh --shell-echo all || :
+  sudo usermod -s "$(grep -m1 zsh /etc/shells)" "$USER"
+  echo "Restart the shell for magic"
+
+nvchad:
+  #!/usr/bin/env -S bash
+  set -euxo pipefail
+  [[ -e ~/.config/nvim && ! -e ~/.config/nvim.old ]] && mv ~/.config/nvim{,.old}
+  git clone --depth 1 https://github.com/NvChad/starter ~/.config/nvim
+
+tmux-tpm:
+  #!/usr/bin/env -S bash
+  set -euxo pipefail
+  [[ -e ~/.config/tmux/plugins/tpm ]] && exit
+  git clone --depth=1 https://github.com/tmux-plugins/tpm \
+        ~/.config/tmux/plugins/tpm
+
+update-plugins:
+  #!/usr/bin/env -S bash
+  set -x
+  nvim --headless "+Lazy! sync" +qa
+  (cd $HOME/.config/nvim; git pull)
+  file=~/.config/tmux/plugins/tpm/scripts/update_plugin.sh
+  grep -q 'git pull -ff' "$file" || sed -Ei 's|(git pull)|\1 -ff|' "$file"
+  "$file" --shell-echo all
+  [[ "$(which oh-my-posh)" == ~/.local/bin/oh-my-posh ]] &&
+        [[ ! -e ~/.local/bin/utils.sh ]] && oh-my-posh upgrade --force
+  zsh -isc "antidote update"
+
+[macos]
+sudo_fprint:
+	#!/usr/bin/env -S bash
+	set -euxo pipefail
+	if [[ ! -e /etc/pam.d/sudo_local ]]; then
+		cat <<-EOF >/etc/pam.d/sudo_local
+					# sudo_local: local config file which survives system update
+					# uncomment following line to enable Touch ID for sudo
+					auth       sufficient     pam_tid.so
+					EOF
+	fi
+
+[macos]
+upgrade:
+  #!/usr/bin/env -S bash
+  set -euxo pipefail
+  softwareupdate --install --all
+  brew update --auto-update
+  brew upgrade && brew autoremove
+  for i in $(brew outdated --cask --greedy | awk "{print \$1}"); do
+    brew rm --cask --force $i
+    rm -rf /opt/homebrew/Caskroom/$i/*
+    brew install --cask --force $i
+  done
+  brew cleanup -s
+  rm -rf $(brew --cache)/* 2>/dev/null
+  mas upgrade
+  source <(sed -n "/trim()/,/^}/p" ~/.local/bin/functions) >/dev/null 2>&1 || :
+  update_file() { local file="$1" temp="/tmp/${1##*/}"
+    trim "$temp" >/dev/null 2>&1 || :
+    if diff -q "$temp" "$file" >/dev/null 2>&1; then
+      rm "$temp"
+    else
+      mv -v "$temp" "$file"
+    fi
+  }
+  { set +x; } 2>&-
+  URL="https://github.com/NoahTheDuke/vim-just/raw/main/syntax/just.vim"
+  curl -LSs "$URL" -o /tmp/just.vim
+  update_file "/opt/homebrew/share/nvim/runtime/syntax/just.vim"
+  chezmoi completion zsh --output=/tmp/_chezmoi
+  update_file "/opt/homebrew/completions/zsh/_chezmoi"
+  URL="https://github.com/dandavison/delta/raw/main/etc/completion"
+  curl -LSs "$URL/completion.zsh" -o /tmp/_delta
+  update_file "/opt/homebrew/completions/zsh/_delta"
+  URL="https://github.com/eza-community/eza/raw/main/completions/zsh/_eza"
+  curl -LSs "$URL" -o /tmp/_eza
+  update_file "/opt/homebrew/completions/zsh/_eza"
+  URL="https://github.com/sharkdp/fd/raw/master/contrib/completion/_fd"
+  curl -LSs "$URL" -o /tmp/_fd
+  update_file "/opt/homebrew/completions/zsh/_fd"
+  fzf --zsh >/tmp/_fzf
+  update_file "/opt/homebrew/completions/zsh/_fzf"
+  URL="https://github.com/casey/just/raw/master/completions/just.zsh"
+  curl -LSs "$URL" -o /tmp/_just
+  update_file "/opt/homebrew/completions/zsh/_just"

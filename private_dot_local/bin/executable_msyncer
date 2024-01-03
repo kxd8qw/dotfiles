@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+
+BASE=ssh://home
+unset CK
+
+. $(dirname $(which $(basename $0)))/functions
+nc="$(tput sgr0 2>&- || echo '[0;39m')"
+bld="$nc$(tput bold 2>&-)"
+blu="$bld$(tput setaf 4 2>&- || echo '[1;34m')"
+cya="$nc$(tput setaf 6 2>&- || echo '[0;36m')"
+grn="$nc$(tput setaf 2 2>&- || echo '[0;32m')"
+mag="$bld$(tput setaf 5 2>&- || echo '[1;35m')"
+red="$bld$(tput setaf 1 2>&- || echo '[1;31m')"
+yel="$nc$(tput setaf 3 2>&- || echo '[0;33m')"
+ce="$nc$(tput hpa 0 2>&-; tput ed 2>&- || echo '[0\`[0j')"
+
+#ed="vim -d"
+#if [[ "$DISPLAY" && -z "$WAYLAND_DISPLAY" ]]; then
+#  [[ -x "$(which meld 2>&1)" ]] && ed=meld ||
+#        { [[ -x "$(which gvimdiff 2>&1)" ]] && ed="gvimdiff -f"; }
+#fi
+#
+#editor() { local newfile="$1" dest="$2" csum i sudo wsudo
+#  for i in "$@"; do
+#    [[ -r "$i" ]] || sudo=sudo
+#    [[ -w "$i" ]] || wsudo=sudo
+#  done
+#  csum="$(echo $($sudo md5sum "$newfile" "$dest" 2>&-))"
+#  $sudo diff -q "$newfile" "$dest" &>/dev/null ||
+#        grep -qs "$csum" .unison/skip || {
+#    eval $wsudo $ed "$@" 2>/dev/null
+#    diff <(echo $csum) <(echo $($sudo md5sum "$newfile" "$dest" 2>&-)) \
+#          >/dev/null && skip "$csum"
+#  }
+#}
+#fsync() { local file="$1" dest="$2"
+#  trim "$file"
+#  [[ -d "$dest" ]] || return
+#  editor "$file" "$dest/${file##*/}"
+#  trim "$file" "$dest/${file##*/}"
+#  [[ -s "$dest" ]] || sudo rm -f "$dest" 2>/dev/null
+#}
+#skip() { local csum="$1" file x
+#  file="$(awk '{print $2}' <<< $csum)"
+#  grep -q "${file##*/}" .unison/skip && sed -i "/${file##*/}/d" .unison/skip
+#  read -n1 -p "Skip $file until further change? [yN]> " x; echo
+#  [[ $x =~ [Yy] ]] && echo "$csum" >>.unison/skip
+#}
+#dsync() { local file="$1" dest="$2"
+#  fsync "$file" "$dest"
+#  rm "$file"
+#}
+#ssync() { local file="$1" dest="$2" \
+#      skip='s/^#* *//; s/^\(de[^ ]* [^ ]* \)[^- ]*/\1/'
+#  diff  -q <(sed "$skip" "$file") <(sed "$skip" "$2/${1##*/}") >/dev/null ||
+#        fsync "$file" "$dest"
+#}
+#xsync() { local file="$1" dest="$2"
+#  fsync "$file" "$dest"
+#  [[ -e "$dest/${file##*/}" ]] || return
+#  [[ -x "$dest/${file##*/}" ]] || sudo chmod a+x "$dest/${file##*/}"
+#}
+#setconf() { local conf="$1" file="$2" after="$3"
+#  grep -qs "^$conf\$" "$file" || {
+#    sed -i "s|^[# ]*\\($conf\\).*|\\1|" "$file"
+#    grep -qs "^$conf\$" "$file" || { [[ "$after" ]] &&
+#          sed -i "/$after/a $conf" "$file"; grep -qs "^$conf\$" "$file" ||
+#          echo "$conf" >>"$file"; }
+#  }
+#}
+localsync() { local i
+#  grep -Eiq 'bibtex|citation|cite' $(which parallel 2>&1) 2>/dev/null &&
+#        vim +'/bibtex\|citation\|cite' $(which parallel)
+
+  [[ "$(uname -s)" == "Linux" ]] || return
+
+  [[ -e /usr/share/fontconfig/conf.avail/70-no-bitmaps.conf && \
+        ! -e /etc/fonts/conf.d/70-no-bitmaps.conf ]] &&
+    sudo ln -s /usr/share/fontconfig/conf.avail/70-no-bitmaps.conf \
+          /etc/fonts/conf.d/70-no-bitmaps.conf
+
+  [[ -d /cdrom || -h /vmlinuz || -h /initrd.img ]] &&
+        sudo rm -rf /cdrom /vmlinuz /initrd.img
+
+  find /etc -name .snapshot -prune 2>&- | grep -E '\.(dpkg|rpm|ucf)'
+}
+unify() {
+  sshcheck
+  NAME=$(sed 's#/$##; s#.*/##' <<< $1)
+  echo -e "\n${blu}${NAME}${nc}: ${grn}Computer${nc} <==> ${grn}${TO}${nc}"
+  [[ $# -eq 2 ]] && rsync --inplace --modify-window=1 ${CK:+-c} $1 $2
+  [[ $# -eq 3 ]] && unison -ui text $CK $1 $2 $3
+  sync
+}
+podsync() { local h=$1 i j x opt='--exclude=.DS_Store --exclude=Sync'
+  shift
+  echo -e "\n${blu}podcasts${nc}: ${grn}Computer${nc} <==> ${grn}${TO}${nc}"
+  for i; do
+    [[ -d $(dirname $i) ]] || mkdir -p $(dirname $i)
+    for j in $(\ls -d $i/* 2>/dev/null | grep -v 'Sync$'); do
+      grep -qs "$j" .unison/previous.${i/\//.} || {
+        [[ $(md5sum "$j" | cut -d' ' -f1) == $(ssh -Tq $h md5sum \"$j\" 2>&- | \
+              cut -d' ' -f1) ]] && continue
+        read -n1 -p"Copy '$j' to $h: ? [Yn]> " x; echo
+        [[ "$x" != "n" ]] && rsync -aPy $opt "$j" $h:$i/
+      }
+      [[ $(du -m "$j" | cut -d'	' -f1) -le 100 && $(md5sum "$j" | \
+            cut -d' ' -f1) != $(ssh -Tq $h md5sum \"$j\" 2>&- | \
+            cut -d' ' -f1) ]] && {
+        ssh -Tq $h "ls -AlFd \"$j\" 2>&-" || continue
+        \ls -AlFd "$j" 2>&-
+        read -n1 -p"Copy '$j' to $h: ? [Yn]> " x; echo
+        [[ "$x" != "n" ]] && rsync -aPy $opt "$j" $h:$i/
+      }
+    done
+    for j in $(cat .unison/previous.${i/\//.} 2>&-); do
+      [[ -e "$j" ]] || {
+        [[ "$(ssh -Tq $h ls -AlFd \"$j\" 2>&-)" =~ ^l|^$ ]] &&
+              x=Y || read -n1 -p"Remove '$j' from $h: ? [Yn]> " x; echo
+        [[ "$x" != "n" ]] && ssh -Tq $h rm -rf \"$j\"
+      }
+    done
+    [[ -d $i/TV ]] && \rm -rf $i/TV
+    rsync -aLPy $opt --delete --delete-after $h:$i/ $i/
+    \ls -d $i/* >.unison/previous.${i/\//.} 2>/dev/null
+  done
+}
+syncer() { local media size
+  localsync
+  unify home $HOME $BASE
+  unify docs $HOME $BASE
+  localsync
+  size="$( (df -B G $HOME $HOME/Music; df -g $HOME $HOME/Music) 2>&- |
+        awk '{gsub(/G/, "", $2); if($2 ~ /^[0-9]*$/) print $2}' |
+        sort -n | tail -1)"
+  [[ $size -lt 250 ]] && media=music
+  # [[ $size -lt 75 ]] && media=pics
+  unify ${media:-media} $HOME $BASE
+  [[ "$media" =~ music ]] && podsync ${BASE##*/} Voice/Podcasts # Videos/Sync
+  exit
+}
+
+### Be nice
+{ ionice -n7 -p$$; nice -n ${NICE:-10} $$; } 2>&-
+### Base check
+[[ -r $HOME/.unison/local.prf ]] || touch $HOME/.unison/local.prf
+[[ -r $HOME/.unison/skip ]] || touch $HOME/.unison/skip
+checkfor unison # vim
+[[ $(hostname) =~ \. ]] && sudo hostname $(hostname | sed 's/\..*//')
+[[ $(hostname) =~ -[0-9]$ ]] && sudo hostname $(hostname | sed 's/-[0-9]$//')
+cd
+### Main decision tree
+while getopts ":CcHhLl" optname; do
+  case "$optname" in
+    [Cc]) export CK="-fastcheck false" ;;
+    [Hh]) TO=Home syncer ;;
+    [Ll]) localsync; exit ;;
+    "?") echo "Unknown option $OPTARG" ;;
+    ":") echo "No argument value for option $OPTARG" ;;
+  esac
+done
+shift $((OPTIND - 1))
+### Figure out something sane to do
+[[ $(hostname) != tundro ]] && TO=Home syncer

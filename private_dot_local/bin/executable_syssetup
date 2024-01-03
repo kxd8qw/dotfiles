@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+#test=echo
+[[ "$1" == "-q" ]] && quick=true
+
+cd
+
+## Firefox dir
+[[ -d .mozilla/firefox/default/chrome ]] ||
+  $test mkdir -p .mozilla/firefox/default/chrome
+grep -qs '^Path=default$' .mozilla/firefox/profiles.ini ||
+  echo -e '[General]\nStartWithLastProfile=1\n\n[Profile0]\nName=default
+IsRelative=1\nPath=default' | $test tee .mozilla/firefox/profiles.ini
+[[ -h .mozilla/firefox/default/chrome/userChrome.css ]] ||
+  $test ln -sf ../../../userChrome.css .mozilla/firefox/default/chrome/
+[[ -h .mozilla/firefox/default/chrome/userContent.css ]] ||
+  $test ln -sf ../../../userContent.css .mozilla/firefox/default/chrome/
+[[ -h .mozilla/firefox/default/user.js ]] ||
+  $test ln -sf ../../user.js .mozilla/firefox/default/
+
+[[ -e examples.desktop ]] && $test rm examples.desktop
+[[ -e Videos ]] || $test mkdir Videos
+[[ -e Videos/Sync ]] || $test ln -s . Videos/Sync
+if [[ -e Private/configs/to_install ]] && grep -iq ubuntu /etc/*release; then
+  [[ -z "$quick" ]] && for i in $(awk '/#ubuntu|^[^#]*$/ && !/^#/ {print $1}' \
+        Private/configs/to_install); do
+    apt-cache depends $i | awk '/Depends:/ {print $2}' >>dependant
+    echo -n '.'
+  done
+  [[ -z "$quick" ]] && for i in $(awk '/#ubuntu|^[^#]*$/ && !/^#/ {print $1}' \
+        Private/configs/to_install); do
+    grep -qs "^$i$" dependant && continue
+    [[ "$(dpkg -l)" =~ ii\ \ $i\  ]] && continue
+    $test sudo apt-get --purge --no-install-recommends install $i
+  done
+  [[ -z "$quick" ]] && rm dependant
+  for i in $(awk '/#ubuntu|^[^#]*$/ && !/^#/ {print $1}' \
+        Private/configs/to_install); do
+    [[ "$(dpkg -l)" =~ ii\ \ $i[\ :] ]] && continue
+    $test sudo apt-get --purge --no-install-recommends install $i
+  done
+elif [[ -e Private/configs/to_install ]] && grep -iq fedora /etc/*release; then
+  rpm -qa >/tmp/packages
+  grep -qs gnome-shell /tmp/packages &&desktop='|#fedora #gnome|^[^#]*#gnome$'
+  grep -qs kde-plasma /tmp/packages && desktop='|#fedora #kde|^[^#]*#kde$'
+  for i in $(awk '/#fedora$'"$desktop"'|^[^#]*$/ && !/^#/ {print $1}' \
+        Private/configs/to_install); do
+    grep -qs "^$i-[0-9]" /tmp/packages || $test sudo dnf install $i
+  done
+  rm /tmp/packages
+fi

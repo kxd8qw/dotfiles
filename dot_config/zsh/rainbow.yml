@@ -1,0 +1,193 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json
+
+console_title_template: '{{regexFind "^[^.]*" .HostName}}{{if .Root}} :: root{{end}} :: {{.PWD}}'
+final_space: true
+version: 3
+palette:
+  black: '#262B44'
+  blue: '#4B95E9'
+  green: '#59C9A5'
+  orange: '#F07623'
+  red: '#D81E5B'
+  white: '#E0DEF4'
+  yellow: '#F3AE35'
+secondary_prompt:
+  background: transparent
+  foreground_templates:
+    - '{{if gt .Code 0}}p:red{{end}}'
+    - '{{if eq .Code 0}}p:green{{end}}'
+  template: '❯❯ '
+transient_prompt:
+  background: transparent
+  foreground_templates:
+    - '{{if gt .Code 0}}p:red{{end}}'
+    - '{{if eq .Code 0}}p:green{{end}}'
+  template: '{{now | date "15:04:05"}}❯ '
+blocks:
+  - type: prompt
+    alignment: left
+    newline: true
+    segments:
+      - type: os
+        style: diamond
+        background: p:yellow
+        foreground: p:black
+        leading_diamond: 
+        template: '{{.Icon}}  '
+      - type: root
+        style: diamond
+        background: p:yellow
+        foreground: p:black
+        template: ' '
+      - type: session
+        style: diamond
+        background: p:yellow
+        foreground: p:black
+        template: '{{regexFind "^[^@]*" .UserName}}{{if .SSHSession}}  {{regexFind "^[^.]*" .HostName}}{{end}} '
+        trailing_diamond: 
+      - type: path
+        style: diamond
+        background: p:orange
+        foreground: p:black
+        leading_diamond: <transparent,background></>
+        properties:
+          folder_icon: 
+          folder_separator_icon: '  '
+          home_icon: 
+          max_width: 40
+          style: powerlevel
+        template: '  {{path .Path .Location}} '
+        trailing_diamond: 
+      - type: git
+        style: powerline
+        background: p:green
+        background_templates:
+          - '{{if or (.Working.Changed) (.Staging.Changed)}}p:yellow{{end}}'
+          - '{{if and (gt .Ahead 0) (gt .Behind 0)}}p:red{{end}}'
+          - '{{if gt .Ahead 0}}#49416D{{end}}'
+          - '{{if gt .Behind 0}}#7A306C{{end}}'
+        foreground: p:black
+        foreground_templates:
+          - '{{if or (.Working.Changed) (.Staging.Changed)}}p:black{{end}}'
+          - '{{if and (gt .Ahead 0) (gt .Behind 0)}}p:white{{end}}'
+          - '{{if gt .Ahead 0}}p:white{{end}}'
+        properties:
+          branch_max_length: 15
+          fetch_status: true
+          fetch_upstream_icon: true
+        powerline_symbol: 
+        template: ' {{if .UpstreamURL}}{{url .UpstreamIcon .UpstreamURL}} {{end}}{{.HEAD}}{{if .BranchStatus}} {{.BranchStatus}}{{end}}{{if .Working.Changed}}  {{.Working.String}}{{end}}{{if .Staging.Changed}}  {{.Staging.String}}{{end}} '
+      - type: status
+        style: diamond
+        background: p:blue
+        background_templates:
+          - '{{if gt .Code 0}}p:red{{end}}'
+        foreground: p:white
+        leading_diamond: <transparent,background></>
+        properties:
+          always_enabled: true
+        template: ' {{if gt .Code 0}}{{else}}{{end}} '
+        trailing_diamond: ' '
+  - type: prompt
+    alignment: right
+    # filler: '·'
+    overflow: hide
+    segments:
+      - type: executiontime
+        style: plain
+        background: transparent
+        foreground: p:white
+        properties:
+          style: round
+          threshold: 3000
+        template: '  <p:orange>{{.FormattedMs}}</>'
+      - type: go
+        style: plain
+        background: transparent
+        foreground: p:blue
+        properties:
+          fetch_version: false
+        template: ' '
+      - type: lua
+        style: plain
+        background: transparent
+        foreground: p:yellow
+        properties:
+          fetch_version: false
+        template: ' '
+      - type: node
+        style: plain
+        background: transparent
+        foreground: p:green
+        properties:
+          fetch_version: false
+        template: ' '
+      - type: python
+        style: plain
+        background: transparent
+        foreground: p:green
+        properties:
+          fetch_version: false
+        template: ' {{if .Venv}} {{.Venv}}{{end}}'
+      - type: ruby
+        style: plain
+        background: transparent
+        foreground: p:red
+        properties:
+          fetch_version: false
+        template: ' '
+      - type: rust
+        style: plain
+        background: transparent
+        foreground: p:red
+        properties:
+          fetch_version: false
+        template: ' '
+      - type: vala
+        style: plain
+        background: transparent
+        foreground: p:blue
+        properties:
+          fetch_version: false
+        template: ' '
+      - type: time
+        style: plain
+        background: transparent
+        foreground: p:white
+        template: '  <p:blue><b>{{.CurrentDate | date "15:04:05"}}</b></>'
+  - type: prompt
+    alignment: left
+    newline: true
+    segments:
+      - type: text
+        style: plain
+        background: transparent
+        foreground_templates:
+          - '{{if gt .Code 0}}p:red{{end}}'
+          - '{{if eq .Code 0}}p:green{{end}}'
+        template: ❯
+tooltips:
+    - type: aws
+      style: diamond
+      background: p:orange
+      foreground: p:black
+      leading_diamond: 
+      properties:
+        display_default: true
+      template: '  {{.Profile}}{{if .Region}}@{{.Region}}{{end}} '
+      tips:
+        - aws
+        - terraform
+      trailing_diamond: 
+    - type: az
+      style: diamond
+      background: p:blue
+      foreground: p:white
+      leading_diamond: 
+      properties:
+        display_default: true
+      template: '  {{.Name}} '
+      tips:
+        - az
+        - terraform
+      trailing_diamond: 

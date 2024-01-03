@@ -1,0 +1,47 @@
+**/.git
+**/.git/**
+.local/bin/gext
+.local/bin/gnome-extensions-cli
+.cert/nm-openvpn
+.cert/nm-openvpn/**
+{{- if ne .chezmoi.os "linux" }}
+.config/ghostty
+.config/niri
+.config/systemd
+.config/waybar
+{{- end }}
+{{- if ne .email "kxd8qw@virginia.edu" }}
+.config/zsh/.zlogin
+.config/zsh/zlogin
+{{- end }}
+.config/tmux/plugins/**
+.gnupg/S.gpg-agent
+.gnupg/private-keys-v1.d
+.gnupg/private-keys-v1.d/**
+.gnupg/random_seed
+{{- if not (and (eq .chezmoi.os "linux")
+      (eq .chezmoi.osRelease.id "furios" "rhel")) }}
+.local/bin/utils.sh
+{{- end }}
+{{- if ne .chezmoi.os "linux" }}
+.local/share/org.gnome.Ptyxis
+{{- end }}
+.ssh/agent*
+{{- if ne .email "kxd8qw@virginia.edu" }}
+.ssh/ansible-hosts
+{{- end }}
+{{- if eq .chezmoi.hostname "ansiblehsz02-s" "ansiblehsz04-s" "ansibleinsthsz1-s" }}
+.ssh/authorized_keys
+{{- end }}
+.ssh/id_dsa.keystore
+.ssh/environment*
+.ssh/remote_mux*
+{{- if ne .chezmoi.os "darwin" }}
+Library
+Library/Application Support
+{{- end }}
+README.md
+sanity.sh
+{{- if ne .email "kxd8qw@virginia.edu" }}
+workspace
+{{- end }}

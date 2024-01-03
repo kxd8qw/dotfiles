@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+function mount_unionfs {
+  sudo mkdir -p /mnt/cache
+  sudo mkdir -p /mnt/union
+  [[ -f /mnt/cache.img ]] || {
+    sudo dd if=/dev/zero of=/mnt/cache.img bs=1M count=512
+    sudo mkfs.ext4 /mnt/cache.img; }
+  [[ -z "$(mount | grep -w /mnt/cache)" ]] && {
+    sudo mount /mnt/cache.img /mnt/cache -o loop
+    sudo chmod 777 /mnt/cache; }
+
+  # mount temporary filesystems
+  mount -t unionfs | grep -qw /mnt/union ||
+        sudo /bin/mount -t unionfs -o dirs=/mnt/cache:/=ro unionfs /mnt/union
+  if [[ "$(mount -t unionfs | grep -w /mnt/union )" ]]; then
+    # basic system mounts
+    mount | grep -qw /mnt/union/dev ||
+          sudo /bin/mount --bind /dev /mnt/union/dev 2>/dev/null
+    mount -t proc | grep -qw /mnt/union/proc ||
+          sudo /bin/mount --bind /proc /mnt/union/proc 2>/dev/null
+    mount -t sysfs | grep -qw /mnt/union/sys ||
+          sudo /bin/mount --bind /sys /mnt/union/sys 2>/dev/null
+    mount | grep -qw /mnt/union/tmp ||
+          sudo /bin/mount --bind /tmp /mnt/union/tmp 2>/dev/null
+  else
+    echo "Mount of /mnt/union failed."
+    exit 2
+  fi
+}
+
+function umount_unionfs {
+  mount | grep -qw /mnt/union/tmp && sudo /bin/umount /mnt/union/tmp 2>/dev/null
+  mount | grep -qw /mnt/union/sys && sudo /bin/umount /mnt/union/sys 2>/dev/null
+  mount | grep -qw /mnt/union/proc && sudo /bin/umount /mnt/union/proc \
+        2>/dev/null
+  mount | grep -qw /mnt/union/dev && sudo /bin/umount /mnt/union/dev 2>/dev/null
+  mount | grep -qw /mnt/union && sudo /bin/umount /mnt/union 2>/dev/null
+  mount | grep -qw /mnt/cache && sudo /bin/umount /mnt/cache 2>/dev/null
+  rmdir /mnt/union
+}
+
+mount_unionfs
+# enter the chroot
+sudo /usr/sbin/chroot /mnt/union /bin/su --shell /bin/bash --login $USER
+# umount temporary filesystems
+umount_unionfs

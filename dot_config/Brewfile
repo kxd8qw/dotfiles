@@ -1,0 +1,316 @@
+# 'brew install'
+brew "advancecomp" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p advancecomp >/dev/null"
+brew "aws2-wrap" if OS.mac?
+brew "awscli" if OS.mac?
+brew "azure-cli" if OS.mac?
+brew "bandwhich" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p bandwhich >/dev/null"
+brew "bash" if OS.mac?
+brew "bat" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p bat >/dev/null"
+brew "bc" if OS.mac?
+brew "btop" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p btop >/dev/null"
+brew "chezmoi" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p chezmoi >/dev/null"
+brew "coreutils" if OS.mac?
+brew "ctop" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p ctop >/dev/null"
+brew "cyme" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p cyme >/dev/null"
+brew "direnv" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p direnv >/dev/null"
+brew "dive" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p dive >/dev/null"
+brew "distrobox" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p distrobox >/dev/null"
+brew "docker-compose" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p docker-compose >/dev/null"
+brew "duti" if OS.mac?
+brew "dysk" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p dysk >/dev/null"
+brew "eye-d3" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p eyeD3 >/dev/null"
+brew "eza" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p eza >/dev/null"
+brew "fd" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p fd >/dev/null"
+brew "findutils" if OS.mac?
+brew "flux" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p flux >/dev/null"
+brew "fortune" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p fortune >/dev/null"
+brew "fzf" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p fzf >/dev/null"
+brew "gawk" if OS.mac?
+brew "gh" if OS.mac?
+brew "glab" if OS.mac?
+brew "git" unless not OS.mac? and system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p git >/dev/null"
+brew "git-delta" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p delta >/dev/null"
+brew "gnu-sed" if OS.mac?
+brew "gnupg" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gpg >/dev/null"
+brew "go" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p go >/dev/null"
+brew "graphicsmagick" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gm >/dev/null"
+brew "grep" if OS.mac?
+brew "grype" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p grype >/dev/null"
+brew "helm" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p helm >/dev/null"
+brew "id3v2" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p id3v2 >/dev/null"
+brew "ipcalc" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p ipcalc >/dev/null"
+brew "jpegoptim" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p jpegoptim >/dev/null"
+brew "jq" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p jq >/dev/null"
+brew "just" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p just >/dev/null"
+brew "k9s" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p k9s >/dev/null"
+brew "kind" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p kind >/dev/null"
+brew "ko" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p ko >/dev/null"
+brew "kubernetes-cli" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p kubectl >/dev/null"
+brew "kubectx" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p kubectx >/dev/null"
+brew "lame" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p lame >/dev/null"
+brew "lazygit" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p lazygit >/dev/null"
+brew "lnav" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p lnav >/dev/null"
+brew "mas" if OS.mac?
+brew "mdcat" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p mdcat >/dev/null"
+brew "minio-mc" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p mc >/dev/null"
+brew "mp3gain" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p mp3gain >/dev/null"
+brew "neovim" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p nvim >/dev/null"
+brew "nmap" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p nmap >/dev/null"
+brew "npm" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p npm >/dev/null"
+brew "oh-my-posh" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p oh-my-posh >/dev/null"
+brew "optipng" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p optipng >/dev/null"
+brew "p7zip" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p 7z >/dev/null"
+brew "python3" if OS.mac?
+brew "rust-parallel" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p parallel >/dev/null"
+brew "podman" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p podman >/dev/null"
+brew "ripgrep" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p rg >/dev/null"
+brew "rsync" unless not OS.mac? and system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p rsync >/dev/null"
+brew "shellcheck" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p shellcheck >/dev/null"
+brew "stress-ng" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p stress-ng >/dev/null"
+brew "syft" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p syft >/dev/null"
+brew "tealdeer" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p tldr >/dev/null"
+brew "tmux" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p tmux >/dev/null"
+brew "trash-cli" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p trash-empty >/dev/null"
+brew "tree" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p tree >/dev/null"
+brew "uv" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p uv >/dev/null"
+brew "xorriso" if OS.mac?
+brew "ykman" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p ykman >/dev/null"
+brew "ykpers" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p ykpersonalize >/dev/null"
+brew "yq" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p yq >/dev/null"
+brew "yt-dlp" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p yt-dlp >/dev/null"
+brew "zoxide" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p zoxide >/dev/null"
+brew "zsh" unless system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p zsh >/dev/null"
+
+# 'brew install --cask'
+cask "caffeine" if OS.mac?
+cask "firefox" if OS.mac?
+cask "font-caskaydia-cove-nerd-font" if OS.mac?
+cask "font-intone-mono-nerd-font" if OS.mac?
+cask "font-jetbrains-mono-nerd-font" if OS.mac?
+cask "font-noto-sans-symbols-2" if OS.mac?
+cask "font-sauce-code-pro-nerd-font" if OS.mac?
+cask "ghostty" if OS.mac?
+cask "gimp" if OS.mac?
+cask "iterm2" if OS.mac?
+cask "itermbrowserplugin" if OS.mac?
+cask "jabra-direct" if OS.mac?
+cask "maccy" if OS.mac?
+cask "podman-desktop" if OS.mac?
+cask "postman" if OS.mac?
+cask "proton-drive" if OS.mac?
+cask "proton-mail" if OS.mac?
+cask "proton-pass" if OS.mac?
+cask "protonvpn" if OS.mac?
+cask "rectangle" if OS.mac?
+cask "scap-workbench" if OS.mac?
+cask "vimr" if OS.mac?
+cask "vivaldi" if OS.mac?
+cask "vmware-fusion" if OS.mac?
+cask "zed" if OS.mac?
+# cask "zoom" if OS.mac?
+
+# 'flatpak install'
+flatpak "app.drey.KeyRack" if OS.linux?
+flatpak "ca.desrt.dconf-editor" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p dconf-editor >/dev/null"
+flatpak "cafe.avery.Delfin" if OS.linux?
+flatpak "com.github.IsmaelMartinez.teams_for_linux" if OS.linux?
+flatpak "com.github.PintaProject.Pinta" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p pinta >/dev/null"
+flatpak "com.github.geigi.cozy" if OS.linux?
+flatpak "com.github.johnfactotum.Foliate" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p foliate >/dev/null"
+flatpak "com.github.maoschanz.drawing" if OS.linux?
+flatpak "com.github.neithern.g4music" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p g4music >/dev/null"
+flatpak "com.github.tchx84.Flatseal" if OS.linux?
+flatpak "com.github.tenderowl.frog" if OS.linux?
+flatpak "com.mattjakeman.ExtensionManager" if OS.linux?
+flatpak "com.protonvpn.www" if OS.linux?
+flatpak "com.rafaelmardojai.Blanket" if OS.linux?
+flatpak "com.ranfdev.DistroShelf" if OS.linux?
+flatpak "com.slack.Slack" if OS.linux?
+flatpak "com.usebottles.bottles" if OS.linux?
+flatpak "com.valvesoftware.Steam" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p steam >/dev/null"
+flatpak "com.vivaldi.Vivaldi" if OS.linux?
+flatpak "com.vixalien.sticky" if OS.linux?
+flatpak "de.haeckerfelix.Shortwave" if OS.linux?
+flatpak "dev.geopjr.Tuba" if OS.linux?
+flatpak "dev.mufeed.Wordbook" if OS.linux?
+flatpak "dev.zed.Zed" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p zeditor >/dev/null"
+flatpak "fr.handbrake.ghb" if OS.linux?
+flatpak "im.dino.Dino" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p dino >/dev/null"
+flatpak "info.febvre.Komikku" if OS.linux?
+flatpak "io.freetubeapp.FreeTube" if OS.linux?
+flatpak "io.github.Pithos" if OS.linux?
+flatpak "io.github.flattool.Ignition" if OS.linux?
+flatpak "io.github.flattool.Warehouse" if OS.linux?
+flatpak "org.deskflow.deskflow" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p deskflow >/dev/null"
+flatpak "io.github.kolunmi.Bazaar" if OS.linux?
+flatpak "io.github.milkshiift.GoofCord" if OS.linux?
+flatpak "io.github.mrvladus.List" if OS.linux?
+flatpak "io.github.nozwock.Packet" if OS.linux?
+flatpak "io.gitlab.adhami3310.Impression" if OS.linux?
+flatpak "io.gitlab.librewolf-community" if OS.linux?
+flatpak "io.podman_desktop.PodmanDesktop" if OS.linux?
+flatpak "me.iepure.devtoolbox" if OS.linux?
+flatpak "me.proton.Mail" if OS.linux?
+flatpak "me.proton.Pass" if OS.linux?
+flatpak "net.nokyan.Resources" if OS.linux?
+flatpak "nl.emphisia.icon" if OS.linux?
+flatpak "org.audacityteam.Audacity" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p audacity >/dev/null"
+flatpak "org.cockpit_project.CockpitClient" if OS.linux?
+flatpak "org.gimp.GIMP" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gimp >/dev/null"
+flatpak "org.gnome.Builder" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-builder >/dev/null"
+flatpak "org.gnome.Calculator" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-calculator >/dev/null"
+flatpak "org.gnome.Calendar" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-calendar >/dev/null"
+flatpak "org.gnome.Characters" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-characters >/dev/null"
+flatpak "org.gnome.Connections" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-connections >/dev/null"
+flatpak "org.gnome.Contacts" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-contacts >/dev/null"
+flatpak "org.gnome.Decibels" if OS.linux?
+flatpak "org.gnome.DejaDup" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p deja-dup >/dev/null"
+flatpak "org.gnome.Epiphany" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p epiphany >/dev/null"
+flatpak "org.gnome.FileRoller" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p file-roller >/dev/null"
+flatpak "org.gnome.Firmware" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-firmware >/dev/null"
+flatpak "org.gnome.Fractal" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p fractal >/dev/null"
+flatpak "org.gnome.Logs" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-logs >/dev/null"
+flatpak "org.gnome.Loupe" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p loupe >/dev/null"
+flatpak "org.gnome.Maps" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-maps >/dev/null"
+flatpak "org.gnome.Mines" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-mines >/dev/null"
+flatpak "org.gnome.NautilusPreviewer" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p sushi >/dev/null"
+flatpak "org.gnome.NetworkDisplays" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-network-displays \
+      >/dev/null"
+flatpak "org.gnome.Papers" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p papers >/dev/null"
+flatpak "org.gnome.Rhythmbox3" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p rhythmbox >/dev/null"
+flatpak "org.gnome.Showtime" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p showtime >/dev/null"
+flatpak "org.gnome.SimpleScan" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p simple-scan >/dev/null"
+flatpak "org.gnome.Snapshot" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p snapshot >/dev/null"
+flatpak "org.gnome.Sudoku" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-sudoku >/dev/null"
+flatpak "org.gnome.TextEditor" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-text-editor >/dev/null"
+flatpak "org.gnome.Weather" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-weather >/dev/null"
+flatpak "org.gnome.World.PikaBackup" if OS.linux?
+flatpak "org.gnome.World.Secrets" if OS.linux?
+flatpak "org.gnome.baobab" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p baobab >/dev/null"
+flatpak "org.gnome.clocks" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-clocks >/dev/null"
+flatpak "org.gnome.font-viewer" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p gnome-font-viewer >/dev/null"
+flatpak "org.gnome.gitlab.YaLTeR.VideoTrimmer" if OS.linux?
+flatpak "org.gnome.gitlab.somas.Apostrophe" if OS.linux?
+flatpak "org.gnome.meld" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p meld >/dev/null"
+flatpak "org.libreoffice.LibreOffice" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p oobase >/dev/null"
+flatpak "org.mozilla.firefox" if OS.linux? and not system \
+      "PATH=/bin:/usr/bin:/usr/local/bin type -p firefox >/dev/null"
+flatpak "org.signal.Signal" if OS.linux?
+flatpak "org.standardnotes.standardnotes" if OS.linux?
+flatpak "page.tesk.Refine" if OS.linux?
+flatpak "re.sonny.Commit" if OS.linux?
+flatpak "re.sonny.Eloquent" if OS.linux?
+flatpak "re.sonny.Junction" if OS.linux?
+flatpak "re.sonny.Tangram" if OS.linux?
+flatpak "sh.loft.devpod" if OS.linux?
+flatpak "us.zoom.Zoom" if OS.linux?
+flatpak "xyz.safeworlds.hiit" if OS.linux?
+
+# 'mas install'
+mas "Beagle IM", id: 1445349494 if OS.mac?
+mas "Tailscale", id: 1475387142 if OS.mac?

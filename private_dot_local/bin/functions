@@ -1,0 +1,238 @@
+2m4v() { local i sub title
+  for i; do
+    grep -Eiq '\.(ass|srt|ssa)$' <<< "$i" && { sub="$i"; continue; }
+    title="$(sed 's|.*/||; s/_/ /g; s/-/ - /; s/\.[0-9a-z]*$//' <<< "$i")"
+    ffmpeg -i "$i" ${sub:+-i "$sub"} -c:v copy -c:a copy -c:s mov_text \
+          -map_metadata -1 -fflags +bitexact -flags:v +bitexact -flags:a \
+          +bitexact -metadata title="$title" "${i%.*}.m4v"
+    unset sub
+  done
+}
+
+2mkv() { local i sub title
+  for i; do
+    grep -Eiq '\.(ass|srt|ssa)$' <<< "$i" && { sub="$i"; continue; }
+    title="$(sed 's|.*/||; s/_/ /g; s/-/ - /; s/\.[0-9a-z]*$//' <<< "$i")"
+    ffmpeg -i "$i" ${sub:+-i "$sub"} -c:v copy -c:a copy -c:s srt \
+          -map_metadata -1 -fflags +bitexact -flags:v +bitexact -flags:a \
+          +bitexact -metadata title="$title" "${i%.*}.mkv"
+    unset sub
+  done
+}
+
+checkfor() { local i j
+  for i; do
+    [[ $i =~ : ]] && j="${i##*:}" i="${i%%:*}" || j=''
+    [[ -x $(which "$i" 2>&1) || -x $(which "$j" 2>&1) ]] ||
+          { echo "ERROR: missing command: $i"; exit; }
+  done
+}
+
+getimg() { local file="$1" dir="$2"
+  eyeD3 --no-color --write-images "$dir" "$file" 2>&1 |
+        awk '/^Wri/ {print $NF; exit}' | sed 's/\.*$//'
+}
+
+gettag() { local file="$1" tag="$2"
+  eyeD3 --no-color "$file" 2>&1 | grep -Ea "(^|	)$tag: " |
+        sed 's/.*'"$tag: "'//; s/	.*//; s/^ *//; s/ *$//;: fixcase
+        s/\([&A-Za-z,] \)\(A\|An\|And\|But\|In\|Nor\|Or\|Of\) /\1\l\2 /g
+        s/\([&A-Za-z,] \)\(On\|The\|To\|Vs\.*\) /\1\l\2 /g; s/  / /g
+        s/, Part /, part /g; t fixcase'
+}
+
+mp3_gain() { local file="$1" gain
+  mp3gain -p -s d "$file"
+  gain=$(mp3gain -k -s s "$file" | awk '/Track.*gain change/ {print $NF+1}')
+  [[ $gain -ne 0 ]] && mp3gain -T -k -p -s s -g $gain "$file"
+}
+
+munge() { local i="$1" dir="$2" gn="$3" kb tag="" music="" wav
+  kb="$(eyeD3 "$i"|grep kb/s|sed 's/.*\[ //; s/ .*//; s/kb.*//; s/[^0-9]//g')"
+  [[ -z "${music_file:=""}" ]] && [[ "${tag_only:=""}" || $kb -le 64 ]] && tag=y
+  [[ "$music_file" ]] || [[ -z "$tag" && "$gn" && "$gn" != Speech ]] &&music=y
+
+  if [[ "$tag" == y ]]; then
+    cp "$i" "$dir/${i##*/}"
+    id3v2 -D "$dir/${i##*/}"                                # Flense tags
+    [[ "${skip_vol:-n}" == y ]] || mp3_gain "$dir/${i##*/}"
+  elif [[ "$music" == y ]]; then
+    wav=$(sed 's/\....$/.wav/' <<< "$dir/${i##*/}")
+    ffmpeg -nostdin -v error -i "$i" -dn -sn -vn -map_metadata -1 \
+          -fflags +bitexact -flags:a +bitexact "$wav" || kill $$
+    lame -h -V 2 --lowpass 24000 "$wav" "$dir/${i##*/}" || kill $$
+    mp3_gain "$dir/${i##*/}" || kill $$
+    rm "$wav"
+  else
+    ffmpeg -nostdin -v error -i "$i" -b:a 64k -dn -sn -vn -map_metadata -1 \
+          -flags:a +bitexact "$dir/${i##*/}" || kill $$
+    mp3_gain "$dir/${i##*/}"
+  fi
+}
+
+retag() { #set -x
+  local i="$1" im="$2" ti="$3" ar="$4" al="$5" yr="$6" tr="$7" gn="$8" co="$9"
+  [[ -f "$i" ]] || { echo "Invalid file: $i"; exit 1; }     # Bail if no file
+  local dir=$(mktemp -d /tmp/mp3.XXXXXXXX); trap "rm -rf $dir" {1..15}
+  [[ "$tr" =~ ^s[/#|] ]] && tr=$(sed "$tr; /[^0-9]/d" <<< "$i") # Cleanup tags
+  [[ "$ti" =~ ^s[/#|] ]] && ti=$(gettag "$i" title | sed "$ti")
+  [[ "$ti" ]] || ti="$(gettag "$i" title|sed 's/_/ /g')"    # Get tags from file
+  [[ "$ar" ]] || ar="$(gettag "$i" artist)"
+  [[ "$al" ]] || al="$(gettag "$i" album)"
+  [[ "$yr" ]] || yr="$( (gettag "$i" year; gettag "$i" ".*date") |
+        sed 's/-.*//' | head -1)"; [[ "$yr" ]] || yr="$(date +%Y)"
+  [[ "$tr" ]] || tr="$(gettag "$i" track | sed 's|/.*||; s|^0$||')"
+  [[ "$gn" ]] || gn="$(gettag "$i" genre | sed 's/ (id.*//')"
+  [[ "$gn" || "$gn" =~ Audiobook.* || "$gn" =~ Podcast.* ]] || gn="Speech"
+  [[ "$gn" == "Speech" && -z "$al" ]] && al='Short Stories'
+  [[ "$im" ]] || im="$(getimg "$i" "$dir")"; [[ "$im" ]] && optimage "$im"
+  munge "$i" "$dir" "$gn"
+
+  # Apply tags:
+  eyeD3 --to-v2.3 ${ti:+-t"$ti"} ${ar:+-a"$ar"} ${al:+-A"$al"} ${tr:+-n$tr} \
+        ${gn:+-G"$gn"} ${co:+--comment="::$co"} ${im:+--add-image="$im":OTHER} \
+        "$dir/${i##*/}" || kill $$
+  { id3v2 -r XDOR "$dir/${i##*/}"; id3v2 -2 -y $yr "$_"; } &>/dev/null
+
+  mv "$dir/${i##*/}" "$i"                                   # Move the file back
+  rm -rf $dir                                               # Clean up
+  #{ set +x; } 2>&-
+}
+
+pause() {
+  [[ "$(ps ux)" =~ totem ]] || return
+  totem --${1:-pause}
+}
+
+oraset() {
+  [[ -r /etc/oratab ]] || return 0
+  ORACLE_HOME="$(grep "^${1:-[A-Z]}" /etc/oratab | tail -1 | cut -d: -f2)"
+  ORACLE_SID="$(grep "^${1:-[A-Z]}" /etc/oratab | tail -1 | cut -d: -f1)"
+  uname -s | grep -qs 'HP-UX' && PATH="$PATH:$ORACLE_HOME/bin" ||
+        PATH="$(sed 's/:[^:]*oracle[^:]*//g' <<< $PATH):$ORACLE_HOME/bin"
+  echo -e "\nOracle instances available on this machine are: "
+  grep '^[A-Z]' /etc/oratab | sort | sed "s/\([^:]*\)/   $bld\1$nc/"
+  echo " ORACLE_HOME is set to: $ORACLE_HOME"
+  echo " ORACLE_SID is set to: $red$ORACLE_SID$nc"
+  echo -e " Use $bld'oraset [SID]'$nc to setup for another db\n"
+  SQLPATH=.
+  export ORACLE_HOME ORACLE_SID SQLPATH
+}
+
+sshcheck() { local file
+  ### Verify SSH agent
+  file=$HOME/.ssh/agent.$HOSTNAME
+  [[ -r $file ]] || { mkdir ${file%/*}; touch $file; chmod 0600 $file; } 2>&-
+  timeout 5 ssh-add -l &>/dev/null || [[ $? -eq 1 ]] || { . $file >/dev/null
+    ssh-add -l &>/dev/null || [[ $? -eq 1 ]] || { pkill -u $USER ssh-agent
+      ssh-agent -s >$file; . $file >/dev/null; }; }
+  ### Verify tools
+  [[ "$(timeout 5 ssh-add -l 2>&1)" =~ no\ id ]] && ssh-add
+}
+
+trim() { local i sudo='' sudow='' temp
+  for i in "$@"; do
+    [[ -e "$i" ]] || continue
+    [[ -r "$i" ]] || sudo=sudo; [[ -w "$i" ]] || sudow=sudo
+    temp="/tmp/trim-${1/*\//}"
+    $sudo sed "s/\r\$//; s/[	 ]*\$//" "$i" >"$temp"
+    sed -iz 's/\n*$//' "$temp"
+    [[ $(tail -c1 "$temp" | wc -l) -gt 0 ]] && truncate -s -1 "$temp"
+    { $sudo diff "$i" "$temp" || cat "$temp" | $sudow tee "$i"; } >/dev/null
+    \rm -f "$temp"
+  done
+}
+
+volume() { local vol="$1"
+  case $(uname -s) in
+    Darwin) [[ "$vol" -ge 60 ]] && vol=5 || vol=3
+      osascript -e "set Volume $vol"
+      ;;
+    Linux) amixer -c0 sset Master unmute &>/dev/null
+      amixer -c0 sset Master 100% &>/dev/null
+      amixer -c0 sset Master $vol% &>/dev/null
+      ;;
+  esac
+}
+
+pn_month() { local ym="$1" pn="$2" x n
+  (( x = ym % 100 + pn ))
+  if (( x > 0 )); then (( n = (x-1) / 12 )); else (( n = - (12-x) / 12 )); fi
+  echo "$(( ym + pn + 88*n ))"
+}
+
+end_month() { local ym="$1" y m ld
+  ((  y = ym  / 100 ))
+  ((  m = ym  % 100 ))
+  for ld in $(cal $m $y); do :; done
+  echo "$(( ym*100 + ld ))"
+}
+
+pn_day() { local ymd="$1" pn="${2:-0}" ym y m d x
+  ((  d = ymd % 100 ))
+  (( ym = ymd / 100 ))
+  ((  y = ym  / 100 ))
+  ((  m = ym  % 100 ))
+
+  if (( pn < 0 )); then
+    if (( d > 1 )); then
+      (( x = ymd - 1 ))
+      (( x > 17520902 && x < 17520914 )) && (( x = 17520902 ))
+      pn_day $x $(( pn + 1 ))
+    else
+      pn_day $(end_month $(pn_month $ym -1)) $(( pn + 1 ))
+    fi
+  elif (( pn > 0 )); then
+    if (( ymd < $(end_month $ym) )); then
+      (( x = ymd + 1 ))
+      (( x > 17520902 && x < 17520914 )) && (( x = 17520914 ))
+      pn_day $x $(( pn - 1 ))
+    else
+      pn_day $(( 100*$(pn_month $ym +1) + 1 )) $(( pn - 1 ))
+    fi
+  else
+    echo "$ymd"
+    return 0
+  fi
+}
+
+cur_weekday() { local ymd="$1" ym y m d i
+  (( ymd >= 17520914 && ymd <= 17520930 )) && (( ymd = ymd - 11 ))
+  ((  d = ymd % 100 ))
+  (( ym = ymd / 100 ))
+  ((  y = ym  / 100 ))
+  ((  m = ym  % 100 ))
+
+  cal $m $y | while read i; do
+    set -- $i
+    [[ $1 == 1 ]] && {
+      echo "$(( ( 6 + d - $# ) % 7 ))"
+      break
+    }
+  done
+}
+
+pn_weekday() { local ymd="$1" weekday="$2" pn="${3:-0}" i x found=0 IN=0
+  [[ $ymd == +* ]] && IN=1
+
+  if (( pn < 0 )); then
+    (( sign = -1 ))
+  elif (( pn > 0 )); then
+    (( sign = +1 ))
+  else
+    (( sign =  0 ))
+  fi
+
+  (( i = pn*sign*7 ))
+
+  while (( i > 0 )); do
+    (( IN == 0 )) && ymd=$(pn_day $ymd $sign)
+    x=$(cur_weekday $ymd)
+    (( x == weekday )) && {
+      (( found = ymd ))
+    }
+    (( IN == 1 )) && ymd=$(pn_day $ymd $sign)
+    (( i = i - 1 ))
+  done
+  echo "$found"
+}

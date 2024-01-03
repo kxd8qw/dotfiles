@@ -1,0 +1,136 @@
+# http://blog.spreedly.com/2014/06/24/merge-pull-request-considered-harmful/
+[alias]
+    add                 = add --patch
+    # addup               = "!git add $(git st | awk '$1 ~ /M|\?/ {print $NF}')"
+    agp                 = "!git amend && git golf && git push -ff"
+    ag2p                = "!git amend && git golf2 && git push -ff"
+    amend               = commit --all --amend --reuse-message=HEAD --quiet
+    amendmsg            = commit --amend --message
+    apf                 = "!git amend && git push -ff"
+    assume              = update-index --assume-unchanged
+    assumed             = "!git ls-files -v | grep ^h | cut -c 3-"
+    br                  = branch
+    branches            = branch --all --list
+    cam                 = commit --all --message
+    changes             = diff --name-status
+    co                  = checkout
+    dc                  = describe --contains
+    diff                = diff --abbrev --color --color-words --histogram -M
+    diffs               = "!git diff && git status --show-stash -s"
+    diffstat            = diff --stat
+    gc                  = gc --aggressive --prune=all
+    golf     = "!until git rev-parse --short HEAD | rg '^0'; do git amend; done"
+    golf2   = "!until git rev-parse --short HEAD | rg '^00'; do git amend; done"
+    hr                  = reset --hard
+    lf                  = log --follow --
+    lg = log --abbrev-commit --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --
+    lgh                 = "!git lg | head"
+    lo          = log --abbrev-commit --decorate --graph --pretty=oneline --stat
+    logs                = log --no-merges --state
+    merge               = merge --ff-only --strategy=histogram
+    ours                = "!f() { git checkout --ours $@ && git add $@; }; f"
+    pe                  = "!git config user.email dperson@gmail.com"
+    pull                = pull --ff-only --rebase --strategy=histogram
+    pushf               = push -ff
+    rebase              = rebase --interactive
+    remotes             = remote --verbose
+    reset               = reset --patch
+    revert-file         = checkout HEAD --
+    revert-file-server  = checkout FETCH_HEAD --
+    snapshot = !git stash save "snapshot: $(date)" &&git stash apply "stash@{0}"
+    sr                  = reset --soft HEAD^
+    st                  = status --short
+    theirs              = "!f() { git checkout --theirs $@ && git add $@; }; f"
+    unassume            = update-index --no-assume-unchanged
+    we                  = "!git config user.email kxd8qw@virginia.edu"
+    whatis              = show -s --pretty='tformat:%h (%s, %ad)' --date=short
+[apply]
+    whitespace          = fix
+[color]
+    branch              = auto
+    diff                = auto
+    interactive         = auto
+    pager               = true
+    status              = auto
+    ui                  = true
+[color "branch"]
+    current             = yellow reverse
+    local               = yellow
+    remote              = green
+[color "diff"]
+    frag                = magenta bold
+    meta                = yellow bold
+    new                 = green bold
+    old                 = red bold
+[color "diff-highlight"]
+    newHighlight        = "green bold 22"
+    newNormal           = "green bold"
+    oldHighlight        = "red bold 52"
+    oldNormal           = "red bold"
+[color "status"]
+    added               = yellow
+    changed             = green
+    untracked           = cyan
+[core]
+    editor              = nvim
+    pager               = delta --paging never
+    whitespace          = space-before-tab,-indent-with-non-tab,trailing-space
+[commit]
+    verbose             = true
+[credential]
+    helper              = cache --timeout=1800
+[delta]
+    navigate            = true
+    line-numbers        = true
+[diff]
+    algorithm           = histogram
+    colorMoved          = default
+    colorMovedWS        = allow-indentation-change
+    renames             = copies
+    submodule           = log
+    tool                = nvim -d
+[fetch]
+    fsckobjects         = true
+    prune               = true
+    prunetags           = true
+[github]
+    user                = dperson
+[help]
+    autocorrect         = 5
+[init]
+    defaultBranch       = main
+[interactive]
+    diffFilter          = delta --color-only
+[log]
+    date                = iso
+[merge]
+    conflictstyle       = zdiff3
+    keepbackup          = false
+[pull]
+    rebase              = true
+[push]
+    autosetupremote     = true
+    default             = simple
+    followtags          = true
+[rebase]
+    autosquash          = true
+    autostash           = true
+    updateRefs          = true
+[recieve]
+    fsckobjects         = true
+[rerere]
+    enabled             = true
+[sendemail]
+    smtpencryption      = tls
+    smtpserver          = smtp.gmail.com
+    smtpserverport      = 587
+    smtpuser            = dperson@gmail.com
+[status]
+    submoduleSummary    = true
+[submodule]
+    recurse             = true
+[transfer]
+    fsckobjects         = true
+[user]
+    email               = {{ .email | quote }}
+    name                = David Personette

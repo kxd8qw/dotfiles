@@ -1,0 +1,92 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  // Appearance
+  "buffer_font_size": 12,
+  "inactive_opacity": 0.8,
+  "ui_font_size": 16,
+  // Config
+  "assistant": { "enabled": false, "button": false },
+  "auto_install_extensions": {
+    "basher": true,
+    "catppuccin-blur": true,
+    "dockerfile": true,
+    "docker-compose": true,
+    "elixir": true,
+    "html": true,
+    "ini": true,
+    "jinja2": true,
+    "justfile": true,
+    "lua": true,
+    "marksman": true,
+    "python-lsp": true,
+    "snippets": true,
+    "toml": true,
+    "xml": true
+  },
+  "command_aliases": { "W": "w", "Wq": "wq", "Q": "q" },
+  "cursor_blink": false,
+  "disable_ai": true,
+  "ensure_final_newline_on_save": false,
+  "experimental.theme_overrides": {
+    "syntax": { "comment": { "font_style": "italic" } }
+  },
+  "file_types": {
+    "Ansible": [
+      "**.ansible.yml",
+      "**.ansible.yaml",
+      "**/defaults/*.yml",
+      "**/defaults/*.yaml",
+      "**/meta/*.yml",
+      "**/meta/*.yaml",
+      "**/tasks/*.yml",
+      "**/tasks/*.yml",
+      "**/tasks/*.yaml",
+      "**/handlers/*.yml",
+      "**/handlers/*.yaml",
+      "**/group_vars/*.yml",
+      "**/group_vars/*.yaml",
+      "**/playbooks/*.yaml",
+      "**/playbooks/*.yml",
+      "**playbook*.yaml",
+      "**playbook*.yml",
+      "**/workspace/uva/*.yaml",
+      "**/workspace/uva/*.yml"
+    ]
+  },
+  "inlay_hints": { "enabled": false },
+  "journal": { "hour_format": "hour24" },
+  "lsp": {
+    // Note, the Zed Ansible extension prefixes all settings with `ansible`
+    // so instead of using `ansible.ansible.path` use `ansible.path`.
+    "ansible-language-server": {
+      "settings": {
+        "ansible": { "path": "ansible" },
+        "executionEnvironment": { "enabled": false },
+        "python": { "interpreterPath": "python3" },
+        "validation": {
+          "enabled": true,
+          // To enable linting, manually install ansible-lint and make sure it is your PATH
+          "lint": { "enabled": true, "path": "ansible-lint" }
+        }
+      }
+    }
+  },
+  "scroll_beyond_last_line": "off",
+  "search": { "regex": true },
+  "tab_size": 2,
+  "telemetry": { "diagnostics": false, "metrics": false },
+  "theme": {
+    "mode": "system",
+    "light": "Catpuccin Latte (Blur)",
+    "dark": "Catppuccin Espresso (Blur)"
+  },
+  "vim": { "use_smartcase_find": true, "use_system_clipboard": "never" },
+  "vim_mode": true
+}
