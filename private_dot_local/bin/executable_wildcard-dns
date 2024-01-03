@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+curl -LSs ftp://ftp.internic.net/domain/root.zone.gz |
+            gunzip -c |
+            awk '$1~/[0-9A-Za-z]+\./ && $4~/NS/ {print $1}' |
+            sort -u |
+            xargs -I'{}' -P$(nproc) dig _.{} |
+            perl -ne 'print if s/^_\.(\w+)\..*\s([\d\.]+)$/$1 $2/;'

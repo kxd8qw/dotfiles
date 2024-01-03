@@ -1,0 +1,9 @@
+#!/usr/bin/env perl
+open FILE, shift or die;
+my @b = ;
+open STDIN, shift;
+while (my $a = <>) {
+    if (grep {$a eq $_} @b) {
+        print;
+    }
+}

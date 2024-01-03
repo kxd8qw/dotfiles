@@ -1,0 +1,5 @@
+#!/usr/bin/env perl
+# Write to a file AFTER data is piped in
+my @buffer = <STDIN>;
+open STDOUT, '>', shift or die;
+print @buffer;

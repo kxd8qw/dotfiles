@@ -1,0 +1,19 @@
+ZSH_COMPDUMP=${XDG_CACHE_HOME:-$HOME/.cache}/zcompdump
+
+if ! (( $+commands[brew] )); then
+  if [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+    brewp="/home/linuxbrew/.linuxbrew"
+  elif [[ -x /opt/homebrew/bin/brew ]]; then
+    brewp="/opt/homebrew"
+  fi
+
+  if [[ -x ${brewp}/bin/brew && $- == *i* ]]; then
+    eval "$(${brewp}/bin/brew shellenv)"
+    for d in ${brewp}/opt/*/libexec/gnubin ${brewp}/opt/python*/libexec/bin; do
+      export PATH="${d}:${PATH}"
+    done 2>/dev/null
+    FPATH="${brewp}/share/zsh/site-functions:${FPATH}"
+  fi
+
+  unset brewp
+fi
