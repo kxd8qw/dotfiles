@@ -1,0 +1,8 @@
+#!/usr/bin/env -S bash
+set -euxo pipefail
+
+src() { . <(sed -n "${2:+$2;}/${1:-trim}()/,/^}/p" ~/.local/bin/functions); }
+
+src 2mkv
+
+2mkv "$@"
