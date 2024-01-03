@@ -29,6 +29,7 @@
 {{- if ne .chezmoi.os "linux" }}
 .local/share/org.gnome.Ptyxis
 {{- end }}
+.netrc
 .ssh/agent*
 {{- if ne .email "kxd8qw@virginia.edu" }}
 .ssh/ansible-hosts

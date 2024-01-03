@@ -11,7 +11,7 @@
   done
 }
 
-2mkv() { local i sub="" title
+2mkv() { local i sub="" title type
   for i; do
     grep -Eiq '\.(ass|srt|ssa)$' <<<"$i" && { sub="$i"; continue; }
     [[ $sub ]] || { ffprobe "$i" 2>&1 | grep -q pgssub && type=copy; }

@@ -1,0 +1,11 @@
+[appearance]
+theme = "Nord"
+timestamp_format = "2006-01-02 15:04"
+
+[sidebar]
+hide_inactive_after_days = 0
+
+# UVa ITS
+[workspaces.uva-its]
+version_ts = "1790107057"
+team_id = "T07Q9CY94"

@@ -17,6 +17,7 @@
     diff                = diff --abbrev --color --color-words --histogram -M
     diffs               = "!git diff && git status --show-stash -s"
     diffstat            = diff --stat
+    fixup      = "!f() { git commit --fixup $@ && git rebase --autosquash; }; f"
     gc                  = gc --aggressive --prune=all
     golf     = "!until git rev-parse --short HEAD | rg '^0'; do git amend; done"
     golf2   = "!until git rev-parse --short HEAD | rg '^00'; do git amend; done"
