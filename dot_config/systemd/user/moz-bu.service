@@ -1,0 +1,10 @@
+[Unit]
+Description=Firefox Automatic Backup
+Documentation=man:flatpak(1)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecCondition=/bin/pgrep firefox-bin
+ExecStart=/bin/rsync -AHPUXahhhy --delete-after --delete-excluded --exclude user-overrides.js --exclude user.js --exclude userChrome.css --exclude userContent.css "${HOME}/.mozilla/" "${HOME}/.mozilla.bu/"
