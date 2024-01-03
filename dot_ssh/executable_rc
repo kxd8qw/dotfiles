@@ -1,0 +1,7 @@
+#!/usr/bin/env -S bash
+
+# Fix SSH auth socket location so agent forwarding works with tmux
+if [[ "$SSH_AUTH_SOCK" ]]; then
+  [[ -d ~/.ssh/agent ]] || mkdir -pv ~/.ssh/agent
+  ln -sf "$SSH_AUTH_SOCK" ~/.ssh/agent/ssh_auth_sock
+fi

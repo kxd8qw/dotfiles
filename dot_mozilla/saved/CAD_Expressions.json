@@ -1,0 +1,285 @@
+{
+  "default": [
+    {
+      "expression": "*.dcu-online.org",
+      "storeId": "default",
+      "listType": "WHITE",
+      "id": "LMPAIu_RM",
+      "cookieNames": [],
+      "cleanLocalStorage": false,
+      "cleanSiteData": []
+    },
+    {
+      "expression": "*.dcu.org",
+      "storeId": "default",
+      "listType": "WHITE",
+      "id": "QW1Y4KEpZG",
+      "cookieNames": [],
+      "cleanLocalStorage": false,
+      "cleanSiteData": []
+    },
+    {
+      "expression": "*.github.com",
+      "storeId": "default",
+      "listType": "WHITE",
+      "id": "ROLJ5wHopl",
+      "cookieNames": [],
+      "cleanLocalStorage": false,
+      "cleanSiteData": []
+    },
+    {
+      "expression": "*.office.com",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cookieNames": [],
+      "id": "eU0A80Ojt",
+      "cleanLocalStorage": true,
+      "cleanSiteData": [
+        "Cache",
+        "IndexedDB",
+        "LocalStorage",
+        "PluginData",
+        "ServiceWorkers"
+      ],
+      "cleanAllCookies": false
+    },
+    {
+      "expression": "*.office365.com",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cookieNames": [],
+      "id": "uo8JElFu2",
+      "cleanLocalStorage": true,
+      "cleanSiteData": [
+        "Cache",
+        "IndexedDB",
+        "LocalStorage",
+        "PluginData",
+        "ServiceWorkers"
+      ],
+      "cleanAllCookies": false
+    },
+    {
+      "expression": "*.okta.com",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cookieNames": [],
+      "id": "u6OcbHm-Vl",
+      "cleanLocalStorage": false,
+      "cleanSiteData": []
+    },
+    {
+      "expression": "*.proton.me",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cleanSiteData": [],
+      "cookieNames": [],
+      "id": "EgNcrVoon"
+    },
+    {
+      "expression": "accounts.google.com",
+      "storeId": "default",
+      "listType": "WHITE",
+      "id": "EVqlf6oEI",
+      "cookieNames": [],
+      "cleanLocalStorage": true,
+      "cleanSiteData": [
+        "Cache",
+        "IndexedDB",
+        "LocalStorage",
+        "PluginData",
+        "ServiceWorkers"
+      ],
+      "cleanAllCookies": false
+    },
+    {
+      "expression": "dcu-online.org",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cleanSiteData": [],
+      "cookieNames": [],
+      "id": "tWtDESLEJ"
+    },
+    {
+      "expression": "dcu.org",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cleanSiteData": [],
+      "cookieNames": [],
+      "id": "hT-lYweWi"
+    },
+    {
+      "expression": "github.com",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cleanSiteData": [],
+      "cookieNames": [],
+      "id": "Icp1Jm1rB"
+    },
+    {
+      "expression": "login.microsoftonline.com",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cookieNames": [],
+      "id": "WVOiBeByQ",
+      "cleanLocalStorage": true,
+      "cleanSiteData": [
+        "Cache",
+        "IndexedDB",
+        "LocalStorage",
+        "PluginData",
+        "ServiceWorkers"
+      ],
+      "cleanAllCookies": false
+    },
+    {
+      "expression": "login.windows.net",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cookieNames": [],
+      "id": "iv1KiQ2Ym",
+      "cleanLocalStorage": true,
+      "cleanSiteData": [
+        "Cache",
+        "IndexedDB",
+        "LocalStorage",
+        "PluginData",
+        "ServiceWorkers"
+      ],
+      "cleanAllCookies": false
+    },
+    {
+      "expression": "mail.google.com",
+      "storeId": "default",
+      "listType": "WHITE",
+      "id": "3YttdZ1YO6",
+      "cookieNames": [],
+      "cleanLocalStorage": true,
+      "cleanSiteData": [
+        "Cache",
+        "IndexedDB",
+        "LocalStorage",
+        "PluginData",
+        "ServiceWorkers"
+      ],
+      "cleanAllCookies": false
+    },
+    {
+      "expression": "portal.microsoftonline.com",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cookieNames": [],
+      "id": "ebpTOsEIh",
+      "cleanLocalStorage": true,
+      "cleanSiteData": [
+        "Cache",
+        "IndexedDB",
+        "LocalStorage",
+        "PluginData",
+        "ServiceWorkers"
+      ],
+      "cleanAllCookies": false
+    },
+    {
+      "expression": "proton.me",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cleanSiteData": [],
+      "cookieNames": [],
+      "id": "Rcu6dkxU5"
+    },
+    {
+      "expression": "theoldreader.com",
+      "listType": "WHITE",
+      "storeId": "default",
+      "cleanSiteData": [],
+      "cookieNames": [],
+      "id": "c6TJF6ZyK"
+    },
+    {
+      "expression": "*.dcumessagecenter.org",
+      "storeId": "default",
+      "listType": "GREY",
+      "id": "pD2-IKVoxV",
+      "cookieNames": [],
+      "cleanLocalStorage": true,
+      "cleanSiteData": []
+    },
+    {
+      "expression": "*.dcustatement.org",
+      "storeId": "default",
+      "listType": "GREY",
+      "id": "nrJiFwn2WB",
+      "cookieNames": [],
+      "cleanLocalStorage": true,
+      "cleanSiteData": []
+    },
+    {
+      "expression": "*.fvision.com",
+      "storeId": "default",
+      "listType": "GREY",
+      "id": "9h9tJBTNMRY",
+      "cookieNames": [],
+      "cleanLocalStorage": true,
+      "cleanSiteData": []
+    },
+    {
+      "expression": "*.google.com",
+      "storeId": "default",
+      "listType": "GREY",
+      "id": "g2YcaaLr9",
+      "cookieNames": [],
+      "cleanLocalStorage": true,
+      "cleanSiteData": [
+        "Cache",
+        "IndexedDB",
+        "LocalStorage",
+        "PluginData",
+        "ServiceWorkers"
+      ],
+      "cleanAllCookies": false
+    },
+    {
+      "expression": "*.intuit.com",
+      "storeId": "default",
+      "listType": "GREY",
+      "id": "EiMvLhKVQYZ",
+      "cookieNames": [],
+      "cleanLocalStorage": true,
+      "cleanSiteData": []
+    },
+    {
+      "expression": "*.presentment.com",
+      "storeId": "default",
+      "listType": "GREY",
+      "id": "Ak20fVO_5Rf",
+      "cookieNames": [],
+      "cleanLocalStorage": true,
+      "cleanSiteData": []
+    },
+    {
+      "expression": "*.sharepoint.com",
+      "listType": "GREY",
+      "storeId": "default",
+      "cookieNames": [],
+      "id": "vplv9JxQni",
+      "cleanLocalStorage": true,
+      "cleanSiteData": [
+        "Cache",
+        "IndexedDB",
+        "LocalStorage",
+        "PluginData",
+        "ServiceWorkers"
+      ]
+    },
+    {
+      "expression": "teams.microsoft.com",
+      "listType": "GREY",
+      "storeId": "default",
+      "cleanLocalStorage": true,
+      "cookieNames": [],
+      "id": "Vz8nrr2XGa-",
+      "cleanSiteData": []
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+# My customized multi platform shell profile
+# Note: must be symbolically linked to '.bashrc' to work properly
+# Written by David Personette
+my_name='David Personette'
+
+### Set up the paths:
+pathadd() { for i in $(echo $* | sed 's/:/ /g; s#/ # #g; s#/$##'); do
+    if [ -d "$i" -a -z "$(eval 'echo $'{$1}|grep -E '(^|:)'$i'(:|$)')" ]; then
+      grep -q 'bin$' <<<$i || continue;eval "${1}=\${$1:+\$$1:}${i}"; fi;done;}
+pathadd file $HOME/.local/bin /usr/local/*bin /usr/local/opt/*/*/*bin \
+  /usr/local/opt/*/*bin /usr/xpg[46]/*bin /sw/*bin /usr/*bin /*bin $PATH \
+  /usr/ucb /usr/games /usr/platform/$(uname -m)/sbin /opt/*/*bin
+PATH=$file
+pathadd MANPATH /usr/local/opt/coreutils/libexec/gnuman /sw/share/man \
+  /usr/local/share/man /usr/share/man /opt/*/man
+uname -s 2>&1 | grep -Eiq 'darwin|linux' ||
+  pathadd LD_LIBRARY_PATH /sw/lib /usr/local/lib /lib /usr/lib /opt/*/lib
+
+### Stop here for non-interactive shells:
+echo "$-/$TERM$0" | grep -Eqs '^[^/]*[is].*s[hu]$|screen' || return || break
+
+### Use the best possible shell
+[ -x "$(which zsh 2>&-)" ] && exec zsh
+[ -z "$BASH" -a -x "$(which bash 2>&-)" ] && exec bash
+
+### Set up shell options:
+HISTCONTROL="ignoreboth"; HISTTIMEFORMAT="%F-%T "; HISTSIZE=25000
+HISTIGNORE='pwd:exit:fg:bg:jobs:top:clear:history:uptime'
+shopt -s cdspell checkhash checkwinsize cmdhist dirspell globstar histappend \
+  histverify nocaseglob progcomp 2>&-
+[[ "$BASH_COMPLETION" ]] || . /etc/bash*completion 2>&- ||
+  . /etc/profile.d/bash_completion.sh 2>&-
+
+### Set up the terminal:
+grep -Eqs '^(xterm|screen)$' <<<$TERM && infocmp ${TERM}-256color &>/dev/null &&
+  TERM=${TERM}-256color
+
+### Configure some environmental settings:
+[[ "$PWD" != "$HOME" && "$PWD" == "$(eval echo ~${PWD##*/} 2>&-)" ]] && cd
+[[ -x "$(which vim 2>&-)" ]] && EDITOR=vim || { alias vim=vi; EDITOR=vi; }
+[[ -x "$(which less 2>&-)" ]] && PAGER=less || { alias less=more; PAGER=more; }
+[[ -x "$(which lesspipe 2>&-)" ]] && eval "$(SHELL=/bin/sh lesspipe)"
+[[ "$TERM" != dumb ]] && eval "$(dircolors -b 2>&-)"
+
+### Set up the prompt:
+nc="$(tput sgr0 2>&- || echo '[0;39m')"
+bld="$nc$(tput bold 2>&-)"
+blu="$bld$(tput setaf 4 2>&- || echo '[1;34m')"
+cya="$nc$(tput setaf 6 2>&- || echo '[0;36m')"
+grn="$nc$(tput setaf 2 2>&- || echo '[0;32m')"
+mag="$bld$(tput setaf 5 2>&- || echo '[1;35m')"
+red="$bld$(tput setaf 1 2>&- || echo '[1;31m')"
+yel="$nc$(tput setaf 3 2>&- || echo '[0;33m')"
+ce="$nc$(tput hpa 0 2>&-; tput ed 2>&- || echo '[0\`[0j')"
+#if [ -n "$BASH" ] && [ -f $HOME/.local/bin/agnoster.bash ]; then
+#    export DEFAULT_USER=`whoami`
+#    . $HOME/.local/bin/agnoster.bash
+#else
+if [[ -x "$(which starship 2>&-)" ]]; then
+    eval "$(starship init bash)"
+else
+    cg() { git branch 2>&- | sed -n 's/^\* \(.*\)/(\1) /p'; }
+    (finger $USER; getent passwd $USER)2>&- | grep -qs "$my_name" ||
+    usr=$yel hst=$grn
+    [[ -x "$(which who 2>&-)" && "$(who am i)" && "$(who am i |
+        grep -E '[(][^:)]+[:.].*[)]')" ]] && hst="$yel"
+    [[ "$(tty)" != /dev/console && "$TERM" != linux ]] &&
+    titl=']0;'"${usr:+$USER@}${HOSTNAME%%.*}:"'\w$(cg)'
+    [[ "$(id | sed 's/[^=]*=\([^(]*\).*/\1/')" == "0" ]] && ps="$red" ||
+    ps="${usr:-$grn}\]\u\[$nc\]@\[${hst:-$blu}"
+    PS1="\[$ce\]|\[$bld\]\D{%F} \A\[$nc\]|	\$(cg)\[$bld\]\w\[$nc\]
+    \[\ek\e\\$titl$ps\]\h\[$nc\]\\\$ "
+fi
+
+### Set up shell command aliases:
+ls -d --color=always / 2>&- | grep -Fqs '[' && color="v --color=auto"
+[[ "$color" ]] || { grep -q darwin <<< $OSTYPE && color="G"; }
+alias chown='\chown --preserve-root'
+alias chmod='\chmod --preserve-root'
+alias chgrp='\chgrp --preserve-root'
+alias cp="\\cp -ai $(cp --help | grep -qs reflink && echo --reflink=auto)"
+alias ln='\ln -irs'
+alias mv='\mv -i'
+alias rm='\rm -I --preserve-root'
+[[ -x "$(which trash 2>&-)" ]] && alias rm=trash
+alias h='\history 25'
+alias j='\jobs'
+alias gdiff='git diff --no-index'
+alias grep="grep -E $(grep --color=always . 2>&- <<<.|grep -Fq [&&echo --color)"
+alias ls="\\ls -Fh$color"
+alias la="\\ls -AFh$color"
+alias ll="\\ls -AFhl$color"
+alias dmesg='\dmesg -HTL=always | less -R'
+alias nocaps='(dumpkeys|grep keymaps;echo "keycode 58 = Control")|sudo loadkeys'
+alias ping='\ping -n'
+file=/sys/fs/cgroup/unified/user.slice/user-$(id -u).slice/cgroup.procs
+alias sc="$HOME/.byobu/bin/byobu"
+alias smv='\rsync -avP --remove-source-files'; complete -F _scp smv
+alias ssh='\ssh -qt'
+[[ "$(ps afuxwww 2>&- | wc -l)" -gt 7 ]] && ps="ps afuxwww" ||
+  { [[ "$(ps auxwww 2>&- | wc -l)" -gt 7 ]] && ps="ps auxwww" || ps="ps -elf"; }
+alias svim='sudoedit'
+alias vp="\\$ps | grep -v 'grep' | grep"
+alias webshare='\python -m SimpleHTTPServer'
+dict() { for i; do curl -LSs "dict://dict.org/d:$i"; done; }
+hog() { i=${1%/};sudo du -akx ${i:-/}|grep -Ev $i/.+/\|${i:-/}\$|sort -n|tail; }
+wws() { for i; do curl -sI "http://$i"; done | grep ^Server: | cut -d: -f2-; }
+
+### If the fortune cookie program exists run it:
+[[ -x "$(which fortune 2>&-)" ]] && echo && fortune && echo
+
+### Check ssh-agent status, and start it, if needed:
+file=$HOME/.ssh/agent.$HOSTNAME
+[[ -r $file ]] || { mkdir $(dirname $file); touch $file;chmod 0600 $file; } 2>&-
+ssh-add -l 2>&- || [[ $? -eq 1 && "$(ssh -V 2>&1 | grep '(Open|Sun_)SSH')" ]] ||
+  { . $file >/dev/null
+    ssh-add -l 2>&-||[[ $? -eq 1 && "$(ssh -V 2>&1|grep '(Open|Sun_)SSH')" ]] ||
+      { pkill -u $USER ssh-agent 2>&-
+        ssh-agent -s >$file; . $file >/dev/null; ssh-add -l; }; }
+
+### Export the shell variables we set:
+export PATH MANPATH LD_LIBRARY_PATH EDITOR PAGER HISTCONTROL PS1 \
+  HISTIGNORE HISTTIMEFORMAT HISTSIZE TERM bld blu cya grn mag red yel nc ce
+unset my_name file usr hst ps titl color cpumem fiber scsi pathadd paths
+
+### Check for local config and run it if it exists:
+[[ -r $HOME/.profile_local ]] && . $HOME/.profile_local || :

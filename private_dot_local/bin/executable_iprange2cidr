@@ -1,0 +1,36 @@
+#!/usr/bin/env -S python3
+
+"""
+Usage: ip2cidr.py input_file
+"""
+
+import sys, re, netaddr
+
+def sanitize (ip):
+    seg = ip.split('.')
+    return '.'.join([ str(int(v)) for v in seg ])
+
+# output
+output = sys.stdout
+
+ptrnSplit = re.compile(' - | , ')
+
+# input
+with open(sys.argv[1], 'r') if len(sys.argv) > 1 else sys.stdin as source:
+    for line in source:
+        # parse on ' - ' et ' , '
+        s = re.split(ptrnSplit, line)
+
+        # sanitize ip: 001.004.000.107 --> 1.4.0.107 to avoid netaddr err.
+        ip = [ sanitize(v) for v in s[:2] ]
+
+        # conversion ip range to CIDR netblocks
+        # single ip in range
+        if ip[0] == ip[1]:
+            output.write('%s/32\n' % ip[0])
+
+        # multiple ip's in range
+        else:
+            ipCidr = netaddr.IPRange(ip[0], ip[1])
+            for cidr in ipCidr.cidrs():
+                output.write('%s\n' % cidr)
