@@ -1,0 +1,253 @@
+#!/usr/bin/env bash
+#
+# all2text - a program to deal with application/octet type MIME parts.
+#
+# Based on
+#
+#   mutt.octet.filter - Octet filter for use with the mutt autoview
+#   facility (version 1.15)
+#
+#   Copyright (C) 1997,1998,1999 David A Pearson
+#   davep@hagbard.demon.co.uk
+#
+#   This program is free software; you can redistribute it and/or
+#   modify it under the terms of the GNU General Public License as
+#   published by the Free Software Foundation; either version 2 of
+#   the license, or (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public
+#   License along with this program; if not, write to the Free
+#   Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139,
+#   USA.
+#
+# In your .mailcap, add the following line:
+#
+# application/msexcel; all2text %s;copiousoutput; +nametemplate=%s.xls
+# application/msword; all2text %s; copiousoutput; +nametemplate=%s.doc
+# application/octet-stream; all2text %s; copiousoutput
+# text/html; all2text %s; copiousoutput; +nametemplate=%s.html
+#
+# and to your .muttrc add:
+#
+# auto_view application/msexcel
+# auto_view application/msword
+# auto_view application/octet-stream
+# auto_view text/html
+
+### Document / File viewers.
+ShowHTML() {
+  (gzcat "$1" || cat "$1") 2>/dev/null | $HTML
+}
+
+ShowExcel() {
+  type xlHtml &>/dev/null || { echo "$0: can't find xlHtml" >&2 && exit; }
+
+  xlHtml "$1" 2>/dev/null | $HTML
+}
+
+ShowImage() {
+  if anytopnm "$1" &>/dev/null; then
+    (anytopnm "$1" | pnmscale -xysize 240 120 | ppmtopgm | pgmtopbm | \
+          pbmtoascii -2x4) 2>&1
+  else
+    echo "$(basename "$1") is not a supported image type"
+  fi
+}
+
+ShowLaTeX() {
+  dir=$(mktemp -td mailtex_XXXXXXXX)
+  cleanup() { rm -rf $dir; }
+  trap cleanup SIGINT SIGTERM
+  ln -s "$1" $dir/index.tex
+  # TODO: fix latex preamble if absent? -- mike@altlinux.com
+  latex2html -ascii_mode -noinfo -split 0 -verbosity 0 -noshow_init -dir $dir \
+        "$dir/index.tex" >/dev/null
+  cat $dir/index.html | $HTML
+  cleanup
+}
+
+ShowMSWord() {
+  type wvHtml &>/dev/null || { echo "$0: can't find wvHtml" >&2 && exit; }
+
+  wvHtml "$1" /dev/fd/1 2>/dev/null | $HTML
+}
+
+ShowObject() {
+  nm "$1"
+}
+
+ShowPPT() {
+  type ppthtml &>/dev/null || { echo "$0: can't find ppthtml" >&2 && exit; }
+
+  ppthtml "$1" 2>/dev/null | $HTML
+}
+
+ShowPDF() {
+  pdftotext "$1" - 2>/dev/null
+}
+
+ShowRTF() {
+  unrtf "$1" | $HTML
+}
+
+ShowTIF() {
+  tiffinfo "$1"
+}
+
+ShowTXT() {
+  LINES="$((gzcat "$1" || cat "$1") 2>/dev/null|wc)"
+  echo "[-- Statistics (lines words chars): "$LINES" --]"
+  echo
+  (gzcat "$1" || cat "$1") 2>/dev/null|cat -v
+}
+
+ShowVCard() {
+  cat "$1" | vcard-filter
+}
+
+### Archive viewers.
+ShowARJ() {
+  unarj l "$1" 2>/dev/null
+}
+
+ShowBZIP() {
+  dir=$(mktemp -td mailtex_XXXXXXXX)
+  cleanup() { rm -rf $dir; }
+  trap cleanup SIGINT SIGTERM
+  cp "$1" $dir
+  bzip2 -d "$dir/$1" 2>/dev/null
+  octet-filter "$dir/*"
+  cleanup
+}
+
+ShowCPIO() {
+  (gzcat "$1" || cat "$1") 2>/dev/null | cpio -it 2>/dev/null
+}
+
+ShowDEB() {
+  dpkg --info "$1"
+  dpkg --contents "$1"
+}
+
+ShowGZIP() {
+  gzip -l "$1" 2>/dev/null
+}
+
+ShowPKGZ() {
+  (gzcat "$1" || cat "$1") 2>/dev/null | pkginfo -l -d - 2>/dev/null
+}
+
+ShowRAR() {
+  unrar l "$1" 2>/dev/null
+}
+
+ShowRPM() {
+  rpm -qilp "$1"
+}
+
+ShowTAR() {
+  ((gzip -dc "$1" || bzip2 -dc "$1" || cat "$1") | tar tvf -) 2>/dev/null
+}
+
+ShowZIP() {
+  unzip -l "$1" 2>/dev/null
+}
+
+Showdata() {
+  echo $(basename "$1"): unprintable data
+}
+
+DisplayFileType() {
+  echo "[-- $(basename $0) file type: \"$1\" --]"
+  echo
+}
+
+DecodeFileName() {
+  # remove character set encodings:
+  # mutt translates "=?ISO-8859-1?Q?x=E4y.doc?="
+  # to "__ISO-8859-1_Q_x_E4y.doc__", we
+  # translate it to "x_E4y.doc"
+  echo "$1" | sed -e 's/__[^_]*_Q_\(.*\)__/\1/g'
+}
+
+ShowMISC() {
+  case $(DecodeFileName "$1") in
+    *.htm|*.html )       ShowHTML   "$1";;
+    *.xls|*.XLS )        ShowExcel  "$1";;
+    *.gif|*.GIF|*.pcx|*.PCX|*.png|*.PNG|*.jpg|*.JPG ) ShowImage  "$1";;
+    *.latex|*.LaTeX|*.LATEX|*.lyx|*.LyX|*.LYX|*.tex|*.TeX|*.TEX )
+      ShowLaTeX  "$1";;
+    *.doc|*.DOC )        ShowMSWord "$1";;
+    *.o )                ShowObject "$1";;
+    *.pdf|*.PDF )        ShowPDF    "$1";;
+    *.ppt|*.PPT )        ShowPPT    "$1";;
+    *.rtf|*.RTF )        ShowRTF    "$1";;
+    *.tif|*.TIF )        ShowTIF    "$1";;
+    *.asc|*.ASC|*.log|*.LOG|*.txt|*.TXT ) ShowTXT    "$1";;
+    *.vcf|*.VCF )        ShowVCard  "$1";;
+    *.arj|*.ARJ )        ShowARJ    "$1";;
+    *.cpio|*.cpo|*.io )  ShowCPIO   "$1";;
+    *.deb )              ShowDEB    "$1";;
+    *local.gz|*.pkg.tgz|*.pkg.tar.gz ) ShowPKGZ   "$1";;
+    *.rar|*.RAR )        ShowRAR    "$1";;
+    *.rpm )              ShowRPM    "$1";;
+    *.tar|*.tgz|*.tar.gz|*.tar.Z|*.tar.z|*.tbz2|*.tar.bz2 ) ShowTAR    "$1";;
+    *.zip|*.ZIP )        ShowZIP    "$1";;
+    *.bz2 )              ShowBZIP   "$1";;
+    *.Z|*.z|*.gz )       ShowGZIP   "$1";;
+    * )                  Showdata   "$1";;
+  esac
+ }
+
+### Decide the best available way to view html.
+if type w3m &>/dev/null; then
+  HTML="w3m -T text/html -cols 80 -dump"
+elif type lynx &>/dev/null; then
+  HTML="lynx -dump -force_html /dev/fd/0"
+else
+  HTML="cat"
+fi
+
+### Main part of script.
+if [[ "$1" == "" ]]; then
+  echo "syntax: $(basename '$0') file"
+else
+  FILE_TYPE=$(file -z "$1" 2>/dev/null)
+  [[ $? -gt 0 ]] && FILE_TYPE=$(file "$1" 2>/dev/null)
+  FILE_TYPE=$(echo "$FILE_TYPE" | cut -d' ' -f 2-)
+
+  DisplayFileType "$FILE_TYPE"
+
+  case "$FILE_TYPE" in
+    *HTML* )               ShowHTML     "$1";;
+    *Microsoft*Excel* )    ShowExcel    "$1";;
+    *TIFF*image*data* )    ShowTIF      "$1";;
+    *image*data* )         ShowImage    "$1";;
+    *LaTeX*document* )     ShowLaTeX    "$1";;
+    *Microsoft*Office*Document* ) ShowMSWord "$1";;
+    *object*file* )        ShowObject   "$1";;
+    *PDF*document* )       ShowPDF      "$1";;
+    *Rich*Text*Format* )   ShowRTF      "$1";;
+    *ascii*text* )         ShowTXT      "$1";;
+    *c*program*text* )     ShowTXT      "$1";;
+    *shell*script*text* )  ShowTXT      "$1";;
+    *ARJ*archive* )        ShowARJ      "$1.";; # "." avoids a bug in unarj.
+    *bzip2*data* )         ShowBZIP     "$1";;
+    *cpio*archive* )       ShowCPIO     "$1";;
+    *Debian*package* )     ShowDEB      "$1";;
+    *pkg*Datastream* )     ShowPKGZ     "$1";;
+    *RAR*archive* )        ShowRAR      "$1";;
+    *RPM* )                ShowRPM      "$1";;
+    *tar*archive* )        ShowTAR      "$1";;
+    *Zip*archive* )        ShowZIP      "$1";;
+    *gzip* )               ShowGZIP     "$1";;
+    *ELF*Intel* )          Showdata     "$1";;
+    *data* )               Showdata     "$1";;
+    * )                    ShowMISC     "$1";;
+  esac
+fi

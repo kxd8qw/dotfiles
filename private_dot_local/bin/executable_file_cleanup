@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+
+. "$(dirname "$(which "$(basename "$0")")")/functions"
+export -f gettag
+
+nc="$(tput sgr0 2>&- || echo '[0;39m')"
+bld="$nc$(tput bold 2>&-)"
+blu="$bld$(tput setaf 4 2>&- || echo '[1;34m')"
+cya="$nc$(tput setaf 6 2>&- || echo '[0;36m')"
+grn="$nc$(tput setaf 2 2>&- || echo '[0;32m')"
+mag="$bld$(tput setaf 5 2>&- || echo '[1;35m')"
+red="$bld$(tput setaf 1 2>&- || echo '[1;31m')"
+yel="$nc$(tput setaf 3 2>&- || echo '[0;33m')"
+ce="$nc$(tput hpa 0 2>&-; tput ed 2>&- || echo '[0\`[0j')"
+
+exists() { local var=$1 exist
+  for i in ${!var}; do [[ -e $i ]] && exist+="${exist:+ }$i"; done
+  eval "$var"=\""$exist"\"
+}
+
+directories="Documents Music Pictures Stuff Videos Voice"
+mp3="Music Stuff Voice"
+names='(-|[0-9]|[IVX]|ames|ary|avid|bara|bert|frey|ft|hael|icia|John|ndix|omas'
+names="$names"'|riana?|vs)'
+opt="-mindepth 1 -name iTunes -prune -o -name Sync -prune -o"
+
+cd || exit
+alias grep='grep --color=auto'
+exists directories
+exists mp3
+rm -rf Applications* MyJabberFiles {Desktop,Downloads}/{\$RECYCLE.BIN,thumbs.db}
+rm -rf Documents/{\$RECYCLE.BIN,Outlook\ Temp,WebEx,thumbs.db,Zoom} \
+      Documents/.parallels-vm-directory Pictures/Vivaldi\ Captures
+find . -name containers -prune -o -name waydroid -prune -o ! -group dperson \
+      -print -exec sudo chown -Rhv dperson. {} \; 2>/dev/null
+find . -name containers -prune -o -name waydroid -prune -o ! -user dperson \
+      -print -exec sudo chown -Rhv dperson. {} \; 2>/dev/null
+find .config/nvim -name __pycache__ -exec rm -rf {} \; 2>/dev/null
+find .config/nvim -name \*.pyc -exec rm -rf {} \; 2>/dev/null
+
+[[ "$1" == "-q" ]] && { quick=1; shift; }
+[[ "$1" == "-Q" ]] && { quick=1; quiet=1; shift; }
+
+### User
+[[ "$quiet" ]] || { echo -e "\n${grn}User${nc}:${mag}"
+  for i in $directories; do
+    find "$i/" $opt \! -user dperson -exec ls -AlFd "{}" \;
+  done 2>&-
+}
+
+### Group
+[[ $quiet ]] || { echo -e "\n${grn}Group${nc}:${mag}"
+  for i in $directories; do
+    find "$i/" $opt \! -group dperson -exec ls -AlFd "{}" \;
+  done 2>&-
+}
+
+### Broken symlinks
+[[ $quiet ]] || { echo -e "\n${grn}Symlinks${nc}:${mag}"
+  for i in $directories; do
+    find "$i/" $opt -xtype l -exec ls -AlFd "{}" \;
+  done 2>&-
+}
+
+### Directory Permissions
+[[ $quiet ]] || echo -e "\n${grn}Directory Perms${nc}:${mag}"
+for i in $directories; do
+  find "$i/" $opt -type d -perm 0775 -exec chmod -v 0755 {} \;
+  [[ $quiet ]] || find "$i/" $opt -name Violet_Blue -prune -o \
+        -name Wakka_Chikka -prune -o -name Android\* -prune -o \
+        -type d \! -perm 755 -exec ls -AlFd "{}" \;
+done
+
+### File Permissions
+[[ $quiet ]] || echo -e "\n${grn}File Perms${nc}:${mag}"
+for i in $directories; do
+  find "$i/" $opt -type f -perm 0664 -exec chmod -v 0644 {} \;
+  [[ $quiet ]] || find "$i/" $opt -name Violet_Blue -prune -o \
+        -name Wakka_Chikka -prune -o -name .localized -prune -o \
+        -name Android\* -prune -o -type f \! -perm 644 \
+        -exec ls -AlFd "{}" \;
+done
+find Private/Passwords.kdbx -type f ! -perm 0600 -exec chmod -v 0600 {} \;
+
+### Names
+[[ $quiet ]] || echo -e "\n${grn}Name${nc}:"
+rename 's/^Downloads/Videos\/Sync/; s/mp4$/m4v/; s/\&/and/g; s/@/at/g;
+      s/[ _]+/_/g; s/[^-0-9A-Za-z?()*\/_,]//g; s/_-_/-/g;
+      s/([A-Za-z]_)(A|An|And|But|In|Nor|Of|On|Or|The|To|Vs\.?)_/$1\l$2_/g;
+      s/(avi|flv|m4v|webm)$/.$1/; s/_*\././' "$([[ $quiet ]]||echo '-v')" \
+      {Downloads,Videos,Voice}/**/*.{avi,flv,m4v,mp4,webm} 2>&-
+for i in $directories; do
+  [[ $i =~ Stuff ]] || find "$i/" \(-name .\* -o -name\) thumbs.db -print0 |
+        xargs -0 -P"$(nproc)" rm -f "$([[ $quiet ]] || echo '-v')"
+  [[ $quiet ]] || {
+    find "$i/" -name TomBoy -prune -o -name iTunes -prune -o -name "* *" \
+          -exec ls -AlFd "{}" \;
+    find "$i/" -name "*;*" -exec ls -AlFd "{}" \; | grep --color ';'
+    find "$i/" -name "*'*" -exec ls -AlFd "{}" \; | grep --color "'"
+    find "$i/" -name "*\!*" -exec ls -AlFd "{}" \; | grep --color '\!'
+    find "$i/" -name "*\?*" -exec ls -AlFd "{}" \; | grep --color '\?'
+    find "$i/" -name "*__*" -exec ls -AlFd "{}" \; | grep --color '__'
+    find "$i/" -name "*_.*" -exec ls -AlFd "{}" \; | grep --color '_\.'
+    find "$i/" -name "*..*" -exec ls -AlFd "{}" \; | grep --color '\.\.'
+    [[ $i =~ Stuff ]] || find "$i/" -name ITC -prune -o -name "*[^0-9].*.*" \
+          -exec ls -AlFd "{}" \;|grep --color '\.'
+    find "$i/" \(-name "*_-_*" -o -name Android\* -o -name Bordertown \
+          -o -name TomBoy\) -prune -o -name "*-*[^0-9]-*" \
+          -exec ls -AlFd "{}" \; | grep --color -- '-'
+    find "$i/" \(-name Android\* -o -name TomBoy\) -prune -o \
+          -name "*-*-*-*" -exec ls -AlFd "{}" \; | grep --color -- '-'
+    }
+  find "$i/" -name "*[A-Za-z]_A_*" -o -name "*[A-Za-z]_An_*" -o \
+        -name "*[A-Za-z]_And_*" -o -name "*[A-Za-z]_But_*" -o \
+        -name "*[A-Za-z]_In_*" -o -name "*[A-Za-z]_Nor_*" -o \
+        -name "*[A-Za-z]_Of_*" -o -name "*[A-Za-z]_On_*" -o \
+        -name "*[A-Za-z]_Or_*" -o -name "*[A-Za-z]_The_*" -o \
+        -name "*[A-Za-z]_To_*" -o -name "*[A-Za-z]_Vs_*" -o \
+        -name "*_.*" -o -name "*._*" |
+        awk '{i=$0; gsub(/_A_/, "_a_", i); gsub(/_An_/, "_an_", i)
+        gsub(/_And_/, "_and_", i); gsub(/_But_/, "_but_", i)
+        gsub(/_In_/, "_in_", i); gsub(/_Nor_/, "_nor_", i)
+        gsub(/_Of_/, "_of_", i); gsub(/_On_/, "_on_", i)
+        gsub(/_Or_/, "_or_", i); gsub(/_The_/, "_the_", i)
+        gsub(/_To_/, "_to_", i); gsub(/_Vs_/, "_vs_", i)
+        gsub(/_\./, ".", i); gsub(/\._/, "_", i)
+        print "mv -i \""$0"\" \""i"\""}' |
+    grep -Ev '_(A|An|And|The)_(Mau)' |
+    grep -Ev "$names"'_(A|An|And|The)_' | bash
+  \ls -F Voice/Audio_Books Voice/Audio_Books/Short_Stories |
+        sed '/Audio_Books\|Short_Stories\|^$/d; s|[-/].*||' | sort | uniq -d
+done 2>&-
+
+[[ "$quick" ]] && exit
+
+### File Type Mismatch
+echo -e "\n${grn}File Type Mismatch${nc}:${mag}"
+for i in $mp3; do
+  find "$i/" -type f -name \*.mp3 -print0 | xargs -0 -I'{}' -P"$(nproc)" \
+        bash -c 'j="$(ffprobe "{}" 2>&1 | grep "Audio: " | grep -v mp3)"
+        [[ "$j" ]] && echo "{}: $j"'
+done
+
+### Genre
+echo -e "\n${grn}Genre${nc}:${mag}"
+find Voice/Humour/ -iname \*.mp3 -print0 2>/dev/null | xargs -0 -I'{}' \
+      -P$(nproc) bash -c 'gen=$(gettag "{}" genre | sed "s/ .*//"); \
+      [[ "$gen" == "Humour" ]] || echo "{} $gen"'
+find Voice/ -path Voice/Humour -prune -o -iname \*.mp3 -print0 2>/dev/null |
+      xargs -0 -I'{}' -P"$(nproc)" bash -c \
+      'gen=$(gettag "{}" genre | sed "s/ .*//"); \
+      [[ "$gen" == "Speech" ]] || echo "{} $gen"'
+
+### ID3 Version
+echo -e "\n${grn}ID3 Version${nc}:${mag}"
+for i in $mp3; do
+  [[ "$i" == "Stuff" ]] && continue
+  find "$i/" -type f -name \*.mp3 -print0 | xargs -0 -I'{}' -P"$(nproc)" \
+        bash -c 'eyeD3 --no-color "{}" 2>&1 | grep v2.3 |grep -qs ID3 ||
+        { echo -n "{}:"; eyeD3 "{}" 2>&1 | grep ^ID3; }
+        id3v2 -l "{}" 2>&1 | grep -qs "^id3v1 tag" && echo "{}"'
+done
+
+### Odd Bitrate
+echo -e "\n${grn}Odd Bitrate${nc}:${mag}"
+find Voice/ -type f -name \*.mp3 -print0 | xargs -0 -I'{}' -P"$(nproc)" bash -c\
+      'eyeD3 --no-color "{}" 2>&1 | grep "kb/s" | sed "s/~//g" | \
+      awk "\$7 < 24 || \$7 > 65 {print \"{}: \"\$7\" \"\$8}" 2>&1 | \
+      grep -v "warning: escape sequence"'
+
+echo "$nc"

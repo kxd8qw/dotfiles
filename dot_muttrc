@@ -1,0 +1,373 @@
+# $Id: .muttrc,v 1.1 2003/05/31 00:03:23 dperson Exp $
+
+# Setting
+set abort_unmodified=ask-yes
+set alias_file=~/.mail_aliases
+set realname="David Personette"
+set from="dperson@gmail.com"
+set sendmail="/usr/bin/msmtp"
+set reverse_name=yes
+set alternates="dperson@(gmail.com|xsmail.com|ssl-mail.com)|(david.personette@thomsonreuters.com|s1.dperson@gmail.com)"
+#set arrow_cursor=yes
+set check_new=yes
+set confirmappend=no
+set copy=yes
+set editor="vim +11 -c 'set tw=72 ft=mail noautoindent nocindent'"
+set fast_reply=yes
+set forward_format="Fwd: %s"
+set envelope_from=yes
+set edit_headers=yes
+#set hdr_format="%4C %Z %{%m/%d} %-15.15F (%4c) %s"
+set help=yes
+#set hostname="xsmail.com"
+set include=yes
+set ispell="/usr/bin/aspell -c"
+set mail_check=300
+set mailcap_path="~/.mailcap:/usr/local/share/mailcap"
+set mailcap_sanitize=yes
+set mark_old=no
+set mbox="=Inbox"
+set mbox_type="Maildir"
+set folder=$HOME/.mail
+set spoolfile=+personal/INBOX
+mailboxes +personal/INBOX +"personal/[Gmail].All Mail" +work/INBOX +"work/[Gmail].All Mail"
+set header_cache=$HOME/.mail/.hcache
+set menu_scroll=yes
+set pager_context=3
+set pager_index_lines=10
+set pager_stop=yes
+#set pgp_autosign=yes
+set pgp_replyencrypt=yes
+set pgp_replysignencrypted=yes
+set pgp_timeout=900
+set pgp_verify_sig=yes
+set postponed="=Drafts"
+set print=ask-yes
+set prompt_after=no
+set record="=Sent Items"
+set reply_to=yes
+set save_empty=yes
+set sort="threads"
+set sort_aux="reverse-last-date-received"
+set sort_browser=reverse-date
+set tmpdir="/tmp"
+set to_chars="X+TCF"
+unset user_agent=yes
+unset wait_key=yes
+
+lists mutt-dev mutt-users
+auto_view application/x-gunzip
+auto_view application/x-gzip
+auto_view application/msword
+auto_view text/html
+
+# Binding
+bind  pager <backspace> previous-page
+bind  pager -           previous-line
+bind  pager \eOm        previous-line
+bind  pager +           next-line
+bind  pager \eOk        next-line
+bind  pager \eOM        next-line
+bind  pager \e[1~       top
+bind  pager \e[4~       bottom
+bind  pager D           delete-message
+
+bind  index <backspace> previous-entry
+bind  index -           previous-entry
+bind  index \eOm        previous-entry
+bind  index +           next-entry
+bind  index \eOk        next-entry
+bind  index \eOM        display-message
+bind  index \e[H        first-entry
+bind  index \e[F        last-entry
+bind  index \e[1~       first-entry
+bind  index \e[4~       last-entry
+bind  index D           delete-message
+
+bind  alias   <space>   select-entry
+bind  alias   x         exit
+bind  attach  x         exit
+bind  browser x         exit
+
+bind  generic "\e<"     first-entry
+bind  generic \e>       last-entry
+bind  generic {         top-page
+bind  generic }         bottom-page
+bind  generic \177      last-entry
+
+macro pager d           s+Trash\n
+macro pager S           s+Saved\n
+
+macro index d           s+Trash\n
+macro index S           s+Saved\n
+
+# What headers to show
+ignore *
+unignore from: date subject to cc reply-to:
+unignore resent- x-resent
+
+# What order to show them
+unhdr_order *
+hdr_order Date: From: To: Reply-To: Cc: Subject:
+
+## On to the colors
+#color	attachment  blue         default
+#color	header      green        default  "^message-id:"
+#color	header      green        default  "^x-mailer:"
+#color	header      green        default  "^user-agent:"
+#color	header      blue         default  "^date: "
+#color	header      brightblue   default  "^from: "
+#color	header      green        default  "^subject: "
+#color	header      brightblue   default  "^to: "
+#color	header      brightblue   default  "^cc: "
+#color	header      brightblue   default  "^reply-to: "
+#color	index       green        default  ~F
+#color	index       red          default  ~D
+#color	index       blue         default  ~T
+#color	index       brightblue   default  ~N
+#color	indicator   brightwhite  blue
+#color	markers     red          default
+#color	quoted      magenta      default
+#color	signature   brightblue   default
+#color	status      brightwhite  green
+#color	tilde       cyan         default
+#color	tree        blue         default
+#color	body        black        default  "(^| )_[-a-z0-9_]+_[,.?]?[ \n]"
+#color	search      default      green
+#color	body        magenta      default  "(ftp|http)s*://[^ ]+"
+#color	body        magenta      default  [-a-z_0-9.]+@[-a-z_0-9.]+
+## attributes when using a mono terminal
+#mono header underline ^(From|Subject):
+#mono quoted bold
+
+# Solarized colors
+#
+# make sure that you are using mutt linked against slang, not ncurses, or
+# suffer the consequences of weird color issues. use "mutt -v" to check this.
+
+# custom body highlights -----------------------------------------------
+# highlight my name and other personally relevant strings
+#color body          J_yellow        J_bg            "(ethan|schoonover)"
+# custom index highlights ----------------------------------------------
+# messages which mention my name in the body
+#color index         J_yellow        J_bg            "~b \"phil(_g|\!| gregory| gold)|pgregory\" !~N !~T !~F !~p !~P"
+#color index         J_cream         J_base3         "~b \"phil(_g|\!| gregory| gold)|pgregory\" ~N !~T !~F !~p !~P"
+#color index         J_yellow        J_cyan          "~b \"phil(_g|\!| gregory| gold)|pgregory\" ~T !~F !~p !~P"
+#color index         J_yellow        J_magent        "~b \"phil(_g|\!| gregory| gold)|pgregory\" ~F !~p !~P"
+## messages which are in reference to my mails
+#color index         J_magent        J_bg            "~x \"(mithrandir|aragorn)\\.aperiodic\\.net|thorin\\.hillmgt\\.com\" !~N !~T !~F !~p !~P"
+#color index         J_magent        J_base3         "~x \"(mithrandir|aragorn)\\.aperiodic\\.net|thorin\\.hillmgt\\.com\" ~N !~T !~F !~p !~P"
+#color index         J_magent        J_cyan          "~x \"(mithrandir|aragorn)\\.aperiodic\\.net|thorin\\.hillmgt\\.com\" ~T !~F !~p !~P"
+#color index         J_magent        J_red           "~x \"(mithrandir|aragorn)\\.aperiodic\\.net|thorin\\.hillmgt\\.com\" ~F !~p !~P"
+
+# for background in 16 color terminal, valid background colors include:
+# base03, bg, black, any of the non brights
+
+# basic colors ---------------------------------------------------------
+color normal        J_base00        J_bg
+color error         J_red           J_bg
+color tilde         J_base02        J_bg
+color message       J_cyan          J_bg
+color markers       J_red           J_base2
+color attachment    J_base2         J_bg
+color search        J_violet        J_bg
+#color status        J_black         J_status
+color status        J_statusfg      J_statusbg
+color indicator     J_base03        J_yellow
+color tree          J_yellow        J_bg                                        # arrow in threads
+
+# basic monocolor screen
+mono  bold          bold
+mono  underline     underline
+mono  indicator     reverse
+mono  error         bold
+
+# index ----------------------------------------------------------------
+
+#color index         J_red           J_bg            "~D(!~p|~p)"               # deleted
+#color index         J_base02        J_bg            ~F                         # flagged
+#color index         J_orange        J_bg            ~=                         # duplicate messages
+#color index         J_base01        J_bg            "~A!~N!~T!~p!~Q!~F!~D!~P"  # the rest
+#color index         J_base          J_bg            "~A~N!~T!~p!~Q!~F!~D"      # the rest, new
+color index         J_red           J_bg            "~A"                        # all messages
+color index         J_orange        J_bg            "~E"                        # expired messages
+color index         J_blue          J_bg            "~N"                        # new messages
+color index         J_blue          J_bg            "~O"                        # old messages
+color index         J_violet        J_bg            "~Q"                        # messages that have been replied to
+color index         J_base01        J_bg            "~R"                        # read messages
+color index         J_blue          J_bg            "~U"                        # unread messages
+color index         J_blue          J_bg            "~U~$"                      # unread, unreferenced messages
+color index         J_base00        J_bg            "~v"                        # messages part of a collapsed thread
+color index         J_base00        J_bg            "~P"                        # messages from me
+color index         J_cyan          J_bg            "~p!~F"                     # messages to me
+color index         J_cyan          J_bg            "~N~p!~F"                   # new messages to me
+color index         J_cyan          J_bg            "~U~p!~F"                   # unread messages to me
+color index         J_base01        J_bg            "~R~p!~F"                   # messages to me
+color index         J_red           J_bg            "~F"                        # flagged messages
+color index         J_red           J_bg            "~F~p"                      # flagged messages to me
+color index         J_red           J_bg            "~N~F"                      # new flagged messages
+color index         J_red           J_bg            "~N~F~p"                    # new flagged messages to me
+color index         J_red           J_bg            "~U~F~p"                    # new flagged messages to me
+color index         J_base02        J_red           "~D"                        # deleted messages
+color index         J_base1         J_bg            "~v~(!~N)"                  # collapsed thread with no unread
+color index         J_yellow        J_bg            "~v~(~N)"                   # collapsed thread with some unread
+color index         J_green         J_bg            "~N~v~(~N)"                 # collapsed thread with unread parent
+# statusbg used to indicated flagged when foreground color shows other status
+# for collapsed thread
+color index         J_red           J_statusbg      "~v~(~F)!~N"                # collapsed thread with flagged, no unread
+color index         J_yellow        J_statusbg      "~v~(~F~N)"                 # collapsed thread with some unread & flagged
+color index         J_green         J_statusbg      "~N~v~(~F~N)"               # collapsed thread with unread parent & flagged
+color index         J_green         J_statusbg      "~N~v~(~F)"                 # collapsed thread with unread parent, no unread inside, but some flagged
+color index         J_cyan          J_statusbg      "~v~(~p)"                   # collapsed thread with unread parent, no unread inside, some to me directly
+color index         J_yellow        J_red           "~v~(~D)"                   # thread with deleted (doesn't differentiate between all or partial)
+#color index         J_yellow        J_bg            "~(~N)"                    # messages in threads with some unread
+#color index         J_green         J_bg            "~S"                       # superseded messages
+#color index         J_red           J_bg            "~T"                       # tagged messages
+#color index         J_orange        J_red           "~="                       # duplicated messages
+
+# message headers ------------------------------------------------------
+
+#color header        J_base01        J_bg            "^"
+color hdrdefault    J_base01        J_bg
+color header        J_base00        J_bg            "^(From)"
+color header        J_blue          J_bg            "^(Subject)"
+
+# body -----------------------------------------------------------------
+
+color quoted        J_blue          J_bg
+color quoted1       J_cyan          J_bg
+color quoted2       J_yellow        J_bg
+color quoted3       J_red           J_bg
+color quoted4       J_orange        J_bg
+
+color signature     J_base01        J_bg
+color bold          J_base02        J_bg
+color underline     J_base02        J_bg
+color normal        J_fg            J_bg
+#
+color body          J_base1         J_bg            "[;:][-o][)/(|]"    # emoticons
+color body          J_base1         J_bg            "[;:][)(|]"         # emoticons
+color body          J_base1         J_bg            "[*]?((N)?ACK|CU|LOL|SCNR|BRB|BTW|CWYL|\
+                                                     |FWIW|vbg|GD&R|HTH|HTHBE|IMHO|IMNSHO|\
+                                                     |IRL|RTFM|ROTFL|ROFL|YMMV)[*]?"
+color body          J_base1         J_bg            "[ ][*][^*]*[*][ ]?" # more emoticon?
+color body          J_base1         J_bg            "[ ]?[*][^*]*[*][ ]" # more emoticon?
+
+## pgp
+
+color body          J_red           J_bg            "(BAD signature)"
+color body          J_cyan          J_bg            "(Good signature)"
+color body          J_base03        J_bg            "^gpg: Good signature .*"
+color body          J_base00        J_bg            "^gpg: "
+color body          J_base00        J_red           "^gpg: BAD signature from.*"
+mono  body          bold                            "^gpg: Good signature"
+mono  body          bold                            "^gpg: BAD signature from.*"
+
+# yes, an insance URL regex
+color body          J_red           J_bg            "([a-z][a-z0-9+-]*://(((([a-z0-9_.!~*'();:&=+$,-]|%[0-9a-f][0-9a-f])*@)?((([a-z0-9]([a-z0-9-]*[a-z0-9])?)\\.)*([a-z]([a-z0-9-]*[a-z0-9])?)\\.?|[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)(:[0-9]+)?)|([a-z0-9_.!~*'()$,;:@&=+-]|%[0-9a-f][0-9a-f])+)(/([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*(;([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*)*(/([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*(;([a-z0-9_.!~*'():@&=+$,-]|%[0-9a-f][0-9a-f])*)*)*)?(\\?([a-z0-9_.!~*'();/?:@&=+$,-]|%[0-9a-f][0-9a-f])*)?(#([a-z0-9_.!~*'();/?:@&=+$,-]|%[0-9a-f][0-9a-f])*)?|(www|ftp)\\.(([a-z0-9]([a-z0-9-]*[a-z0-9])?)\\.)*([a-z]([a-z0-9-]*[a-z0-9])?)\\.?(:[0-9]+)?(/([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*(;([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*)*(/([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*(;([-a-z0-9_.!~*'():@&=+$,]|%[0-9a-f][0-9a-f])*)*)*)?(\\?([-a-z0-9_.!~*'();/?:@&=+$,]|%[0-9a-f][0-9a-f])*)?(#([-a-z0-9_.!~*'();/?:@&=+$,]|%[0-9a-f][0-9a-f])*)?)[^].,:;!)? \t\r\n<>\"]"
+# and a heavy handed email regex
+#color body          J_magent        J_bg            "((@(([0-9a-z-]+\\.)*[0-9a-z-]+\\.?|#[0-9]+|\\[[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\]),)*@(([0-9a-z-]+\\.)*[0-9a-z-]+\\.?|#[0-9]+|\\[[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\.[0-9]?[0-9]?[0-9]\\]):)?[0-9a-z_.+%$-]+@(([0-9a-z-]+\\.)*[0-9a-z-]+\\.?|#[0-9]+|\\[[0-2]?[0-9]?[0-9]\\.[0-2]?[0-9]?[0-9]\\.[0-2]?[0-9]?[0-9]\\.[0-2]?[0-9]?[0-9]\\])"
+
+# Various smilies and the like
+#color body          J_base3         J_bg            "<[Gg]>"                            # <g>
+#color body          J_base3         J_bg            "<[Bb][Gg]>"                        # <bg>
+#color body          J_yellow        J_bg            " [;:]-*[})>{(<|]"                  # :-) etc...
+# *bold*
+#color body          J_blue          J_bg            "(^|[[:space:][:punct:]])\\*[^*]+\\*([[:space:][:punct:]]|$)"
+#mono  body          bold                            "(^|[[:space:][:punct:]])\\*[^*]+\\*([[:space:][:punct:]]|$)"
+# _underline_
+#color body          J_blue          J_bg            "(^|[[:space:][:punct:]])_[^_]+_([[:space:][:punct:]]|$)"
+#mono  body          underline                       "(^|[[:space:][:punct:]])_[^_]+_([[:space:][:punct:]]|$)"
+# /italic/  (Sometimes gets directory names)
+#color body         J_blue          J_bg            "(^|[[:space:][:punct:]])/[^/]+/([[:space:][:punct:]]|$)"
+#mono body          underline                       "(^|[[:space:][:punct:]])/[^/]+/([[:space:][:punct:]]|$)"
+
+# Border lines.
+#color body          J_blue          J_bg            "( *[-+=#*~_]){6,}"
+
+#folder-hook .                  "color status        J_black         J_status        "
+#folder-hook gmail/inbox        "color status        J_black         J_yellow        "
+#folder-hook gmail/important    "color status        J_black         J_yellow        "
+
+folder-hook personal/* set from="dperson@gmail.com"
+folder-hook work/* set from="david.personette@thomsonreuters.com"
+
+# Command formats for gpg.
+#
+# This version uses gpg-2comp from
+#   http://muppet.faveve.uni-stuttgart.de/~gero/gpg-2comp.tar.gz
+#
+# $Id: gpg.rc,v 3.1 2002/03/26 22:23:58 roessler Exp $
+#
+# %p    The empty string when no passphrase is needed,
+#       the string "PGPPASSFD=0" if one is needed.
+#
+#       This is mostly used in conditional % sequences.
+#
+# %f    Most PGP commands operate on a single file or a file
+#       containing a message.  %f expands to this file's name.
+#
+# %s    When verifying signatures, there is another temporary file
+#       containing the detached signature.  %s expands to this
+#       file's name.
+#
+# %a    In "signing" contexts, this expands to the value of the
+#       configuration variable $pgp_sign_as.  You probably need to
+#       use this within a conditional % sequence.
+#
+# %r    In many contexts, mutt passes key IDs to pgp.  %r expands to
+#       a list of key IDs.
+
+# Note that we explicitly set the comment armor header since GnuPG, when used
+# in some localiaztion environments, generates 8bit data in that header, thereby
+# breaking PGP/MIME.
+
+# decode application/pgp
+set pgp_decode_command="/usr/bin/gpg  --charset utf-8   %?p?--passphrase-fd 0? --no-verbose --quiet  --batch  --output - %f"
+
+# verify a pgp/mime signature
+set pgp_verify_command="/usr/bin/gpg   --no-verbose --quiet  --batch  --output - --verify %s %f"
+
+# decrypt a pgp/mime attachment
+set pgp_decrypt_command="/usr/bin/gpg   --passphrase-fd 0 --no-verbose --quiet  --batch  --output - %f"
+
+# create a pgp/mime signed attachment
+# set pgp_sign_command="/usr/bin/gpg-2comp --comment '' --no-verbose --batch  --output - --passphrase-fd 0 --armor --detach-sign --textmode %?a?-u %a? %f"
+set pgp_sign_command="/usr/bin/gpg    --no-verbose --batch --quiet   --output - --passphrase-fd 0 --armor --detach-sign --textmode %?a?-u %a? %f"
+
+# create a application/pgp signed (old-style) message
+# set pgp_clearsign_command="/usr/bin/gpg-2comp --comment ''  --no-verbose --batch  --output - --passphrase-fd 0 --armor --textmode --clearsign %?a?-u %a? %f"
+set pgp_clearsign_command="/usr/bin/gpg   --charset utf-8 --no-verbose --batch --quiet   --output - --passphrase-fd 0 --armor --textmode --clearsign %?a?-u %a? %f"
+
+# create a pgp/mime encrypted attachment
+# set pgp_encrypt_only_command="pgpewrap gpg-2comp  -v --batch  --output - --encrypt --textmode --armor --always-trust -- -r %r -- %f"
+set pgp_encrypt_only_command="pgpewrap /usr/bin/gpg  --charset utf-8    --batch  --quiet  --no-verbose --output - --encrypt --textmode --armor --always-trust -- -r %r -- %f"
+
+# create a pgp/mime encrypted and signed attachment
+# set pgp_encrypt_sign_command="pgpewrap gpg-2comp  --passphrase-fd 0 -v --batch  --output - --encrypt --sign %?a?-u %a? --armor --always-trust -- -r %r -- %f"
+set pgp_encrypt_sign_command="pgpewrap /usr/bin/gpg  --charset utf-8 --passphrase-fd 0  --batch --quiet  --no-verbose  --textmode --output - --encrypt --sign %?a?-u %a? --armor --always-trust -- -r %r -- %f"
+
+# import a key into the public key ring
+set pgp_import_command="/usr/bin/gpg  --no-verbose --import -v %f"
+
+# export a key from the public key ring
+set pgp_export_command="/usr/bin/gpg   --no-verbose --export --armor %r"
+
+# verify a key
+set pgp_verify_key_command="/usr/bin/gpg   --verbose --batch  --fingerprint --check-sigs %r"
+
+# read in the public key ring
+set pgp_list_pubring_command="/usr/bin/gpg   --no-verbose --batch --quiet   --with-colons --list-keys %r"
+
+# read in the secret key ring
+set pgp_list_secring_command="/usr/bin/gpg   --no-verbose --batch --quiet   --with-colons --list-secret-keys %r"
+
+# fetch keys
+# set pgp_getkeys_command="pkspxycwrap %r"
+
+# pattern for good signature - may need to be adapted to locale!
+
+set pgp_good_sign="^gpg: Good signature from"
+
+# OK, here's a version which uses gnupg's message catalog:
+# set pgp_good_sign="`gettext -d gnupg -s 'Good signature from "' | tr -d '"'`"

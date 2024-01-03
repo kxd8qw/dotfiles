@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+for i in ${@:-~}; do
+  find $i -type f -print0 | xargs -0 -P$(nproc) -n1 file | grep -v ': .*: ' |
+        awk -F': ' '/SQLite/ {gsub(/\\/, "\\\\\\\\", $0); print $1}' |
+        while read j; do sqlite3 "$j" "vacuum; analyze;"; chattr +C "$j"; done
+done
