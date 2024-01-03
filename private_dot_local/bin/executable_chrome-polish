@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+### Check for command line option
+[[ "$1" == "-g" ]] || {
+  except="where host_key not like '%google.com' AND"
+  except+=" host_key not like '%appspot.com' AND"
+  except+=" host_key not like '%thomson.com' AND"
+  except+=" host_key not like '%webex.com'"
+}
+
+for chrome in $HOME/.config/chromium $HOME/.config/google-chrome; do
+  ### does this path exist
+  [[ -d  $chrome ]] || continue
+
+  ### Make sure chromium is stopped
+  pkill -10 $(sed 's|.*/||' <<< $chrome)
+
+  ### Make sure the style sheet is linked
+  [[ -h $chrome/Default/User\ StyleSheets/Custom.css ]] ||
+        ln -sf ../../../../.mozilla/userContent.css \
+        $chrome/Default/User\ StyleSheets/Custom.css
+
+  ### Purge cookies and vacuum sqlite DBs
+  sqlite3 $chrome/Default/Cookies "delete from cookies $except;"
+  find $chrome/Default -type f | xargs file | awk -F: '/SQLite/ {print $1}' |
+        while read i; do sqlite3 "$i" "vacuum; analyze;"; done
+
+  ### Purge files
+  find $chrome/Default/Local\ Storage/ ! -name chrome-extension\* -type f \
+        -exec rm {} \;
+  rm -rf $chrome/Default/databases/*
+  rm -rf $chrome/Default/File\ System/*
+  find $chrome/ -name .\* -type f -exec rm {} \;
+  find $chrome/ -follow -lname \* -exec rm {} \;
+  rm -rf $HOME/.cache/chromium/*
+
+  ### Clean config file
+  sed -i '/.*"gpu_blacklist"/,/^   },/d
+        /\(count\|date\|id\|key\|num\|present\|registration\|time\)/ {
+        s/\(.*: \[* *"*\)[^",]*\("*\]* *,*\)/\10\2/ }' $chrome/Local\ State
+done

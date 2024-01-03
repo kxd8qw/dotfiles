@@ -1,0 +1,7 @@
+theme = "catppuccin-mocha"
+default_timeline = "home"
+vim_mode = true
+refresh_interval_secs = 90
+post_limit = 50
+show_media = true
+default_post_networks = []

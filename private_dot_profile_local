@@ -1,0 +1,64 @@
+#export DOCKER_CONTENT_TRUST=1
+#export HOMEBREW_CASK_OPTS='--appdir="/Applications"'
+#export HOMEBREW_CASK_OPTS+=' --colorpickerdir="/Library/Color Pickers"'
+#export HOMEBREW_CASK_OPTS+=' --prefpanedir="/Library/PreferencePanes"'
+#export HOMEBREW_CASK_OPTS+=' --qlplugindir="/Library/QuickLook"'
+#export HOMEBREW_CASK_OPTS+=' --fontdir="/Library/Fonts"'
+#export HOMEBREW_CASK_OPTS+=' --servicedir="/Library/Services"'
+#export HOMEBREW_CASK_OPTS+=' --input_methoddir="/Library/Input Methods"'
+#export HOMEBREW_CASK_OPTS+=' --internet_plugindir="/Library/Internet Plug-Ins"'
+#export HOMEBREW_CASK_OPTS+=' --screen_saverdir="/Library/Screen Savers"'
+#export HOMEBREW_INSTALL_CLEANUP=1
+export PYTHONDONTWRITEBYTECODE=1
+[[ "$no_proxy" ]] && export no_proxy=${no_proxy%,}
+bline() { local i j k;cd;for i;do echo -n "$i: ";cat ~/.ssh/auth*ys|ssh -q \
+    $i 'i=.ssh/authorized_keys;mkdir -p .config .ssh 2>&-;cat >$i;chmod 0600 $i'
+    \rm -rf .config/nvim/{e,v}*;for j in .bash{rc,_logout} .byobu .config/nvim/\
+    .emacs{,lisp} .gitconfig .profile .{ex,input,screen,vim}rc; do echo -n "."
+    k=${j%/*}; rsync -PaqL --del $j $i:$k 2>/dev/null; done; echo; done; }
+complete -F _ssh bline 2>/dev/null || complete -F _scp bline 2>/dev/null
+fix_net() { [[ -n "$(nmcli c s --active | awk '$3 ~ /^wifi$/')" ]] && { \
+    local wifi=$(nmcli c s --active | awk '$3 ~ /^wifi$/ {print $1}'); \
+    local eth=$(nmcli connection show --active | awk '$3 ~ /^ethernet$/ \
+    {print $1}'); ping -c1 $(ip r show dev $(nmcli connection show --active | \
+    awk '$3 ~ /^wifi$/ {print $4}') | awk '/^default/ {print $3}') >/dev/null \
+    2>&1 && echo 'Network functional' || { nmcli connection down $wifi; \
+    nmcli connection up $wifi; [[ "$eth" ]] && { nmcli connection down $eth; \
+    nmcli connection up $eth; }; } 2>/dev/null; }; ssh homep -Nf; }
+alias dbt='distrobox enter -n toolbox -- sudo'
+alias ed3r='eyeD3 --to-v2.3 --remove-all-comments --remove-all-lyrics -GSpeech'
+alias hostterm='printf "\033]777;container;pop;;\033\\"'
+alias k9='kill -9'
+[[ -x "$(which gio 2>&1)" ]] && open() { gio open "$@" >/dev/null 2>&1; }
+[[ -x "$(which xfreerdp 2>&1)" ]] && alias rdp="xfreerdp -g 1024x768 --plugin \
+            cliprdr --plugin rdpdr --data disk:home:$HOME -x 87 -k 0x00010409"
+[[ -x "$(which rdesktop 2>&1)" ]] && alias rdp="rdesktop -K -g 1024x768 \
+            -r clipboard:CLIPBOARD -r disk:home=$HOME"
+alias sa='(cd $HOME/.ssh; ssh-add id_{rsa,ed25519})'
+src() { . <(sed -n "${2:+$2;}/${1:-trim}()/,/^}/p" ~/.local/bin/functions); }
+#alias sup='softwareupdate --install --all; brew update; brew upgrade;\
+#for i in $(brew outdated --cask --greedy | awk "{print \$1}"); do \
+#    brew rm --cask --force $i; \
+#    \rm -rf /usr/local/Caskroom/$i/*; \
+#    brew install --cask --force $i; \
+#done; \
+#brew cleanup -s; \
+#\rm -rf $(brew --cache)/* 2>/dev/null; \
+#pip3 list --outdated | tail -n +3 | cut -d" " -f1 | xargs -rn1 pip3 install -U'
+alias virsh='env LIBVIRT_DEFAULT_URI=qemu:///system virsh'
+alias vundle='for i in .config/nvim/bundle/*; do \
+    (cd $i; \
+    git reflog expire --expire=now --all; \
+    git gc --aggressive --prune=all; \
+    git repack -Adf --depth=250 --window=250; \
+    git prune-packed); \
+done; \
+chmod -R g-w .config/nvim; \
+rsync -Paq home:.config/nvim/bundle .; \
+for i in $(find bundle); do \
+    [[ ( -f ".config/nvim/$i" && \
+                $(md5sum "$i" | cut -d" " -f1) == \
+                $(md5sum ".config/nvim/$i" | cut -d" " -f1) ) || \
+                -d ".config/nvim/$i" ]] && touch -r "$i" ".config/nvim/$i"; \
+done; \
+\rm -rf bundle'

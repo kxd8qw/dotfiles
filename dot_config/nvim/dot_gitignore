@@ -1,0 +1,12 @@
+**/.DS_Store
+.luarc.json
+after
+coc-settings.json
+custom
+ftplugin
+lazy-lock.json
+nviminfo
+plugin
+spell
+syntax
+undo

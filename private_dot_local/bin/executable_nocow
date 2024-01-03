@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+#===============================================================================
+#          FILE: nocow
+#
+#         USAGE: ./nocow
+#
+#   DESCRIPTION: Disables COW (Copy On Write) for files
+#
+#       OPTIONS: ---
+#  REQUIREMENTS: ---
+#          BUGS: ---
+#         NOTES: ---
+#        AUTHOR: David Personette (dperson@gmail.com),
+#  ORGANIZATION:
+#       CREATED: 2016-08-09 15:14
+#      REVISION: ---
+#===============================================================================
+
+set -euo pipefail                           # Treat unset variables as an error
+unalias cat chattr mv rm touch 2>&- || :
+
+[[ -x $(which chattr 2>&1) ]] || {
+  echo "${0##*/}: ERROR: command 'chattr' not found"
+  exit 1
+}
+
+for file; do
+  [[ -e "$file" ]] || { echo "$file: file doesn't exist" >&2; continue; }
+  [[ -f "$file" ]] || { echo "$file: not a regular file" >&2; continue; }
+  [[ ! -e "$file.cow$$" ]] || continue
+  mv  -i "$file" "$file.cow$$"
+  touch -r "$file.cow$$" "$file"
+  chattr +C "$file"
+  cat "$file.cow$$" >"$file"
+  rm "$file.cow$$"
+done

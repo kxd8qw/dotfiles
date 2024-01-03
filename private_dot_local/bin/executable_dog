@@ -1,0 +1,24 @@
+#!/usr/bin/env -S python3
+
+import argparse
+import sys
+
+# Instantiate argparse
+parser = argparse.ArgumentParser(
+        description='Write buffer to file argument after fully read')
+# Required positional argument
+parser.add_argument('filename', help='A required "file" argument')
+args = parser.parse_args()
+
+
+# flush function to write buffer to specified file argument
+def flush(buffer, file=args.filename):
+  with open(file, 'w') as f:
+    f.write('\n'.join(buffer))
+
+
+buffer = []
+for line in sys.stdin:
+  buffer.append(line.rstrip())
+
+flush(buffer)

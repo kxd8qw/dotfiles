@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+QUOTES="Documents/Cool/Quotes.txt"
+RAND=$(expr $RANDOM \% $(cat $QUOTES|wc -l))
+
+[[ "$1" == "-w" ]] && cat $HOME/.signature || cat $HOME/.signature-personal
+sed -n "${RAND}p;${RAND}q" $QUOTES
