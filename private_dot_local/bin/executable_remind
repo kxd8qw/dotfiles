@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+. $(dirname $(which $(basename $0)))/functions
+
+display() {
+  if [[ "$DISPLAY" && -x "$(which zenity 2>&1)" ]]; then
+    (for (( i=0; i<5; i++ )); do echo $i; sleep 1; done |
+          zenity --progress --auto-close --auto-kill --pulsate \
+          --text="$@" &) &>/dev/null
+  fi
+  echo -e "rc\ned\nel" | tput -S
+  echo -en "${bold}${@}${nc}"
+}
+prompt() {
+  if [[ "$DISPLAY" && -x "$(which zenity 2>&1)" ]]; then
+    zenity --info --text="$@"
+  else
+    echo -e "rc\ned\nel" | tput -S
+    read -t1 x
+    read -n1 -sp "${bold}${@}${nc}" x
+  fi
+}
+
+unset cont interval num play rate
+sound=/usr/share/sounds/ubuntu/stereo/dialog-question.ogg
+[[ -e $sound ]] || { sound.sh && mv dialog-question.ogg /tmp/ &&
+      sound=/tmp/dialog-question.ogg; } &>/dev/null
+[[ -x "$(which paplay 2>&1)" ]] && play=paplay
+[[ -z "$play" && -x "$(which afplay 2>&1)" ]] && { play=afplay
+  ffmpeg -v error -y -i $sound ${sound/ogg/mp3}; sound=${sound/ogg/mp3}; }
+
+while getopts ":Cci:n:r:Vv:" optname; do
+  case "$optname" in
+    [Cc]) cont=y ;;
+    i) interval="$OPTARG" ;;
+    n) num="$OPTARG" ;;
+    r) rate="$OPTARG" ;;
+    V) vol=$(volume 59 2>/dev/null); exit ;;
+    v) vol="$OPTARG" ;;
+    "?") echo "Unknown option $OPTARG" ;;
+    ":") echo "No argument value for option $OPTARG" ;;
+  esac
+done
+shift $(( OPTIND - 1 ))
+
+[[ -z "$interval$rate" && "$1" ]] && interval=$1
+[[ -z "$num" && "$2" ]] && num=$2
+[[ "$rate" ]] && { interval=$(bc -l <<< "1 / $rate")
+  num=$(bc -l <<< "$rate * ${1:-1}"); }
+
+echo "$(date '+%F.%R')"
+vol=$(volume ${vol:-73} 2>/dev/null)
+trap "echo; volume 59 &>/dev/null; exit" {1..15}
+tput sc
+
+for i in $(seq ${num:+2} ${num:-1}); do
+  [[ "$cont" ]] && pause play
+  sleep $(bc -l <<< "60 * ${interval:-1} - 1")
+  pause
+  $play $sound &
+  [[ "$num" ]] && { [[ "$cont" ]] && prompt "Press space to continue ($i)"
+    display "${i} of ${num}"; }
+done
+
+[[ "$num" && -z "$cont" ]] && wait && $play $sound && sleep 10
+[[ "$cont" ]] && pause play
+display "Complete\n"
+volume 59 &>/dev/null
