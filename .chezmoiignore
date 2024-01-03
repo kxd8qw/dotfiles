@@ -1,0 +1,29 @@
+README.md
+**/.git
+**/.git/**
+.local/bin/gext
+.local/bin/gnome-extensions-cli
+.cert/nm-openvpn
+.cert/nm-openvpn/**
+{{- if ne .chezmoi.os "linux" }}
+.config/niri
+.config/waybar
+{{- end }}
+.config/tmux/plugins/**
+.gnupg/S.gpg-agent
+.gnupg/private-keys-v1.d
+.gnupg/private-keys-v1.d/**
+.gnupg/random_seed
+{{- if ne .chezmoi.os "linux" }}
+.local/share/org.gnome.Ptyxis
+{{- end }}
+.ssh/agent*
+.ssh/id_dsa.keystore
+.ssh/environment*
+.ssh/remote_mux*
+get_gitlab_projects.sh
+update.sh
+utils.sh
+{{- if ne .chezmoi.os "darwin" }}
+.zlogin
+{{- end }}

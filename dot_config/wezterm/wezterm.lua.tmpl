@@ -1,0 +1,53 @@
+-- Pull in the wezterm API
+local wezterm = require 'wezterm'
+-- local ssh_domains = require('extra.ssh')
+
+-- This will hold the configuration.
+local config = wezterm.config_builder()
+
+-- This is where you actually apply your config choices
+
+-- initial terminal size
+config.initial_cols = 100
+config.initial_rows = 33
+
+-- just use the open window
+config.prefer_to_spawn_tabs = true
+
+-- notification bell
+-- config.audible_bell = "Disabled"
+config.colors = {
+  visual_bell = '#202020',
+}
+config.visual_bell = {
+  fade_in_function = 'EaseIn',
+  fade_in_duration_ms = 150,
+  fade_out_function = 'EaseOut',
+  fade_out_duration_ms = 150,
+}
+
+-- make sure you use a font you have installed
+config.adjust_window_size_when_changing_font_size = true
+{{- if eq .chezmoi.os "darwin" }}
+config.font = wezterm.font 'JetBrainsMono Nerd Font Mono'
+config.font_size = 12
+{{- else }}
+config.font = wezterm.font 'MonaspiceKr Nerd Font'
+config.font_size = 11
+{{- end }}
+
+-- color scheme
+config.color_scheme = "GitHub Dark"
+
+--window opacity reduced
+config.window_background_opacity = .85
+
+-- scroll bar
+config.enable_scroll_bar = true
+
+-- Custom Key Bindings
+-- disable_default_key_bindings = true,
+-- config.ssh_domains = ssh_domains
+
+-- and finally, return the configuration to wezterm
+return config
